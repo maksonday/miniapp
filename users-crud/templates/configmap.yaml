@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "users-crud.fullname" . }}-cm
+  name: {{ include "users-crud.fullname" . }}-cm-users
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
@@ -15,3 +15,32 @@ data:
     database = "miniapp"
     sslmode = "disable"
     port = 5432
+
+    [redis-config]
+    host = "{{ .Release.Name }}-redis.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "users-crud.fullname" . }}-cm-auth
+  namespace: {{ .Release.Namespace }}
+data:
+  app-config: |
+    log-file = "/var/log/auth-service.log"
+    log-level = "info"
+    listen-port = "8000"
+
+    [db-config]
+    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-config]
+    host = "{{ .Release.Name }}-redis.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+

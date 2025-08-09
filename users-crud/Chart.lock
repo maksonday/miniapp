@@ -8,5 +8,8 @@ dependencies:
 - name: kube-prometheus-stack
   repository: https://prometheus-community.github.io/helm-charts
   version: 75.15.0
-digest: sha256:48df91e4fbc74606fa9ac6b34679ef33fd622d2482471cbe863dd9527d716a08
-generated: "2025-07-26T00:19:36.318450782+05:00"
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 22.0.0
+digest: sha256:6f85cf5b50718cea5c9e6c7b9b443f5d665f366e4548c3f76c5a4ada3a3e45ab
+generated: "2025-08-09T04:14:13.143012852+05:00"

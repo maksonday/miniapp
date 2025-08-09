@@ -18,6 +18,39 @@
         }
       },
       "required": ["auth"]
+    },
+    "redis": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "type": "object",
+          "properties": {
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Name of the pre-created secret with Redis password."
+            },
+            "existingSecretPasswordKey": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Key of the pre-created secret with Redis password."
+            }
+          },
+          "required": ["existingSecret", "existingSecretPasswordKey"]
+        }
+      },
+      "required": ["auth"]
+    },
+    "auth": {
+      "type": "object",
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the pre-created secret with RSA-cert"
+        }
+      },
+      "required": ["existingSecret"]
     }
   }
 }

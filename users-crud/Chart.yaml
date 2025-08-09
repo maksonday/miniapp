@@ -36,3 +36,7 @@ dependencies:
     version: "75.15.0"
     repository: "https://prometheus-community.github.io/helm-charts"
 
+  - name: "redis"
+    version: "22.0.0"
+    repository: "https://charts.bitnami.com/bitnami"
+
