@@ -49,7 +49,7 @@ data:
 
 ```bash
 helm repo add maksonday https://maksonday.github.io/miniapp/
-helm install users-crud -n miniapp \ 
+helm install miniapp -n miniapp \ 
 --set postgresql.auth.existingSecret=postgres-secret \ 
 --set redis.auth.existingSecret=redis-secret \ 
 --set auth.existingSecret=rsa-cert \ 

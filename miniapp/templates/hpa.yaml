@@ -2,15 +2,15 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "users-crud.fullname" . }}-users
+  name: {{ include "miniapp.fullname" . }}-users
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "users-crud.labels" . | nindent 4 }}-users
+    {{- include "miniapp.labels" . | nindent 4 }}-users
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "users-crud.fullname" . }}-users
+    name: {{ include "miniapp.fullname" . }}-users
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
@@ -38,15 +38,15 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "users-crud.fullname" . }}-auth
+  name: {{ include "miniapp.fullname" . }}-auth
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "users-crud.labels" . | nindent 4 }}-auth
+    {{- include "miniapp.labels" . | nindent 4 }}-auth
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "users-crud.fullname" . }}-auth
+    name: {{ include "miniapp.fullname" . }}-auth
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

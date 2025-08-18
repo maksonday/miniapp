@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "users-crud.fullname" . }}-users
+  name: {{ include "miniapp.fullname" . }}-users
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "users-crud.labels" . | nindent 4 }}-users
+    {{- include "miniapp.labels" . | nindent 4 }}-users
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -18,7 +18,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "users-crud.selectorLabels" . | nindent 6 }}
+      {{- include "miniapp.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -26,7 +26,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "users-crud.labels" . | nindent 8 }}
+        app: {{ include "miniapp.fullname" . }}-users
+        {{- include "miniapp.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -35,7 +36,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "users-crud.serviceAccountName" . }}
+      serviceAccountName: {{ include "miniapp.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -52,13 +53,13 @@ spec:
           - containerPort: 8000
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.users.path }}/health
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.users.path }}/health
               port: 8000
             initialDelaySeconds: 15
             periodSeconds: 20
@@ -67,7 +68,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-          - name: {{ include "users-crud.fullname" . }}-volume
+          - name: {{ include "miniapp.fullname" . }}-volume
             mountPath: /usr/local/etc
           - name: {{ .Values.postgresql.auth.existingSecret }}
             mountPath: "/secret/postgres"
@@ -78,12 +79,12 @@ spec:
           - name: {{ .Values.auth.existingSecret }}
             mountPath: /keys
       volumes:
-        - name: {{ include "users-crud.fullname" . }}-volume
+        - name: {{ include "miniapp.fullname" . }}-volume
           configMap:
-            name: {{ include "users-crud.fullname" . }}-cm-users
+            name: {{ include "miniapp.fullname" . }}-cm-users
             items:
             - key: app-config
-              path: miniapp.conf
+              path: users.conf
         - name: {{ .Values.postgresql.auth.existingSecret }}
           secret:
             secretName: {{ .Values.postgresql.auth.existingSecret }}
@@ -120,10 +121,10 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "users-crud.fullname" . }}-auth
+  name: {{ include "miniapp.fullname" . }}-auth
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "users-crud.labels" . | nindent 4 }}-auth
+    {{- include "miniapp.labels" . | nindent 4 }}-auth
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -137,7 +138,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "users-crud.selectorLabels" . | nindent 6 }}
+      {{- include "miniapp.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -145,7 +146,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "users-crud.labels" . | nindent 8 }}
+        app: {{ include "miniapp.fullname" . }}-auth
+        {{- include "miniapp.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -154,7 +156,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "users-crud.serviceAccountName" . }}
+      serviceAccountName: {{ include "miniapp.serviceAccountName" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -171,13 +173,13 @@ spec:
           - containerPort: 8000
           readinessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.auth.path }}/health
               port: 8000
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /health
+              path: {{ .Values.auth.path }}/health
               port: 8000
             initialDelaySeconds: 15
             periodSeconds: 20
@@ -186,7 +188,7 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           volumeMounts:
-          - name: {{ include "users-crud.fullname" . }}-volume
+          - name: {{ include "miniapp.fullname" . }}-volume
             mountPath: /usr/local/etc
           - name: {{ .Values.postgresql.auth.existingSecret }}
             mountPath: "/secret/postgres"
@@ -197,9 +199,9 @@ spec:
           - name: {{ .Values.auth.existingSecret }}
             mountPath: /keys
       volumes:
-        - name: {{ include "users-crud.fullname" . }}-volume
+        - name: {{ include "miniapp.fullname" . }}-volume
           configMap:
-            name: {{ include "users-crud.fullname" . }}-cm-auth
+            name: {{ include "miniapp.fullname" . }}-cm-auth
             items:
             - key: app-config
               path: auth-service.conf

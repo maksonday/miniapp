@@ -1,4 +1,4 @@
-# Default values for users-crud.
+# Default values for miniapp.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -96,11 +96,12 @@ kube-prometheus-stack:
 users:
   image:
     repository: maksonday
-    name: miniapp
+    name: users
     # This sets the pull policy for images.
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "test"
+  path: /api
 
 auth:
   image:
@@ -110,6 +111,7 @@ auth:
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "test"
+  path: /auth
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
