@@ -45,7 +45,7 @@ data:
 ```
 
 
-Секрет должен находиться в том же namespace, что и устанавливаемый chart
+Секреты должен находиться в том же namespace, что и устанавливаемый chart
 
 ```bash
 helm repo add maksonday https://maksonday.github.io/miniapp/
