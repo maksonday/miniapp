@@ -48,12 +48,8 @@ data:
 Секреты должен находиться в том же namespace, что и устанавливаемый chart
 
 ```bash
-helm repo add maksonday https://maksonday.github.io/miniapp/
-helm install miniapp -n miniapp \ 
---set postgresql.auth.existingSecret=postgres-secret \ 
---set redis.auth.existingSecret=redis-secret \ 
---set auth.existingSecret=rsa-cert \ 
---set redis.auth.existingSecretPasswordKey=redis-password
+helm repo add miniapp https://maksonday.github.io/miniapp/
+helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password
 ```
 
 ## Тестирование
