@@ -1,0 +1,704 @@
+{
+	"info": {
+		"_postman_id": "f432850c-e111-440c-8fc9-d8ee9054cea4",
+		"name": "auth and api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25646654"
+	},
+	"item": [
+		{
+			"name": "register user1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains refresh token in cookie and access token in header\", function () {\r",
+							"    const refresh_token = pm.response.headers.get(\"Set-Cookie\");\r",
+							"    const authHeader = pm.response.headers.get(\"Authorization\"); // Corrected header name\r",
+							"\r",
+							"    pm.expect(refresh_token).to.exist.and.to.match(/refresh_token=.+/);\r",
+							"    pm.expect(authHeader).to.exist.and.to.match(/Bearer .+/); // Added check for undefined\r",
+							"\r",
+							"    if (authHeader) {\r",
+							"        pm.environment.set(\"authorization1\", authHeader);\r",
+							"    }\r",
+							"    if (refresh_token) {\r",
+							"        pm.environment.set(\"refresh_token1\", refresh_token);\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"maksonday\",\r\n    \"firstname\": \"Maksim\",\r\n    \"lastname\": \"Agafonov\",\r\n    \"phone\": \"1234\",\r\n    \"email\": \"1234\",\r\n    \"password\": \"Qwerty1234!@\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/register",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user1 profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request headers: \" + pm.request.headers.toString());\r",
+							"console.log(\"Response: \" + pm.response.body);\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is equal to expected JSON\", function () {\r",
+							"    const expectedResponse = {\"username\":\"maksonday\",\"firstname\":\"Maksim\",\"lastname\":\"Agafonov\",\"email\":\"1234\",\"phone\":\"1234\"};\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.deep.equal(expectedResponse);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization1}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update user1 profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization1}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token1}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"maksonday111\",\r\n    \"firstname\": \"Maksim\",\r\n    \"lastname\": \"Agafonov\",\r\n    \"phone\": \"1234\",\r\n    \"email\": \"1234\",\r\n    \"password\": \"Qwerty1234!@\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/user/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user1 profile after update",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request headers: \" + pm.request.headers.toString());\r",
+							"console.log(\"Response: \" + pm.response.body);\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is equal to expected JSON\", function () {\r",
+							"    const expectedResponse = {\"username\":\"maksonday111\",\"firstname\":\"Maksim\",\"lastname\":\"Agafonov\",\"email\":\"1234\",\"phone\":\"1234\"};\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.deep.equal(expectedResponse);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization1}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/user",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "register user2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains refresh token in cookie and access token in header\", function () {\r",
+							"    const refresh_token = pm.response.headers.get(\"Set-Cookie\");\r",
+							"    const authHeader = pm.response.headers.get(\"Authorization\"); // Corrected header name\r",
+							"\r",
+							"    pm.expect(refresh_token).to.exist.and.to.match(/refresh_token=.+/);\r",
+							"    pm.expect(authHeader).to.exist.and.to.match(/Bearer .+/); // Added check for undefined\r",
+							"\r",
+							"    if (authHeader) {\r",
+							"        pm.environment.set(\"authorization2\", authHeader);\r",
+							"    }\r",
+							"    if (refresh_token) {\r",
+							"        pm.environment.set(\"refresh_token2\", refresh_token);\r",
+							"    }\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"maksonday1\",\r\n    \"firstname\": \"Maksim1\",\r\n    \"lastname\": \"Agafonov1\",\r\n    \"phone\": \"12341\",\r\n    \"email\": \"12341\",\r\n    \"password\": \"Qwerty1234!@1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/register",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user2 profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request headers: \" + pm.request.headers.toString());\r",
+							"console.log(\"Response body: \" + pm.response.body);\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is equal to expected JSON\", function () {\r",
+							"    const expectedResponse = {\"username\":\"maksonday1\",\"firstname\":\"Maksim1\",\"lastname\":\"Agafonov1\",\"email\":\"12341\",\"phone\":\"12341\"};\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.deep.equal(expectedResponse);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization2}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token2}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update user2 profile",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization2}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token2}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"maksonday1111\",\r\n    \"firstname\": \"Maksim1\",\r\n    \"lastname\": \"Agafonov1\",\r\n    \"phone\": \"12341\",\r\n    \"email\": \"12341\",\r\n    \"password\": \"Qwerty1234!@1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/user/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user2 profile after update",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request headers: \" + pm.request.headers.toString());\r",
+							"console.log(\"Response body: \" + pm.response.body);\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is equal to expected JSON\", function () {\r",
+							"    const expectedResponse = {\"username\":\"maksonday1111\",\"firstname\":\"Maksim1\",\"lastname\":\"Agafonov1\",\"email\":\"12341\",\"phone\":\"12341\"};\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.deep.equal(expectedResponse);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization2}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token2}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout user1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request headers: \" + pm.request.headers.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is equal to expected JSON\", function () {\r",
+							"    const expectedResponse = {\"message\":\"logged out\"};\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.deep.equal(expectedResponse);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization1}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/auth/logout",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user1 profile after logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request headers: \" + pm.request.headers.toString());\r",
+							"console.log(\"Response body: \" + pm.response.body);\r",
+							"\r",
+							"pm.test(\"Response status code is 401\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(401);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is equal to expected JSON\", function () {\r",
+							"    const expectedResponse = {\"error\": \"access-token expired\"};\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.deep.equal(expectedResponse);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization1}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login user1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains refresh token in cookie and access token in header\", function () {\r",
+							"    const refresh_token = pm.response.headers.get(\"Set-Cookie\");\r",
+							"    const authHeader = pm.response.headers.get(\"Authorization\"); // Corrected header name\r",
+							"\r",
+							"    pm.expect(refresh_token).to.exist.and.to.match(/refresh_token=.+/);\r",
+							"    pm.expect(authHeader).to.exist.and.to.match(/Bearer .+/); // Added check for undefined\r",
+							"\r",
+							"    if (authHeader) {\r",
+							"        pm.environment.set(\"authorization1\", authHeader);\r",
+							"    }\r",
+							"    if (refresh_token) {\r",
+							"        pm.environment.set(\"refresh_token1\", refresh_token);\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"maksonday111\",\r\n    \"password\": \"Qwerty1234!@\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user1 profile after login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request headers: \" + pm.request.headers.toString());\r",
+							"console.log(\"Response body: \" + pm.response.body);\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body is equal to expected JSON\", function () {\r",
+							"    const expectedResponse = {\"username\":\"maksonday111\",\"firstname\":\"Maksim\",\"lastname\":\"Agafonov\",\"email\":\"1234\",\"phone\":\"1234\"};\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.deep.equal(expectedResponse);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization1}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token1}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/user/",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "arch.homework",
+			"type": "string"
+		}
+	]
+}

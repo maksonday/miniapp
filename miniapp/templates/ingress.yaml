@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "miniapp.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ .Values.host }}
+    http:
+      paths:
+        - path: {{ .Values.users.path }}
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "miniapp.fullname" . }}-users
+              port:
+                number: {{ .Values.service.port }}
+        - path: {{ .Values.auth.path }}
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "miniapp.fullname" . }}-auth
+              port:
+                number: {{ .Values.service.port }}

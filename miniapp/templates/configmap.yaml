@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "miniapp.fullname" . }}-cm-users
+  namespace: {{ .Release.Namespace }}
+data:
+  app-config: |
+    log-file = "/var/log/users.log"
+    log-level = "info"
+    listen-port = "8000"
+    auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
+    base-path = "{{ .Values.users.path }}"
+
+    [db-config]
+    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-config]
+    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "miniapp.fullname" . }}-cm-auth
+  namespace: {{ .Release.Namespace }}
+data:
+  app-config: |
+    log-file = "/var/log/auth-service.log"
+    log-level = "info"
+    listen-port = "8000"
+    base-path = "{{ .Values.auth.path }}"
+
+    [db-config]
+    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-config]
+    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "miniapp.fullname" . }}-users
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-users
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+  selector:
+    {{- include "miniapp.selectorLabels" . | nindent 4 }}
+    app: {{ include "miniapp.fullname" . }}-users
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "miniapp.fullname" . }}-auth
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-auth
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+  selector:
+    {{- include "miniapp.selectorLabels" . | nindent 4 }}
+    app: {{ include "miniapp.fullname" . }}-auth
