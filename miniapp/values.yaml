@@ -102,9 +102,9 @@ users:
     repository: maksonday
     name: users
     # This sets the pull policy for images.
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test"
+    tag: "latest"
   path: /api
 
 auth:
@@ -112,7 +112,7 @@ auth:
     repository: maksonday
     name: auth-service
     # This sets the pull policy for images.
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "test"
   path: /auth

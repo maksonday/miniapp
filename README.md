@@ -55,3 +55,9 @@ helm install miniapp -n miniapp \
 --set auth.existingSecret=rsa-cert \ 
 --set redis.auth.existingSecretPasswordKey=redis-password
 ```
+
+## Тестирование
+
+```bash
+newman run miniapp/tests/auth_and_api_postman_collection.json
+```
