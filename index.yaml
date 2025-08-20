@@ -1,198 +1,27 @@
 apiVersion: v1
 entries:
-  ingress-nginx:
-  - annotations:
-      artifacthub.io/changes: |
-        - Update Ingress-Nginx version controller-v1.13.0
-      artifacthub.io/prerelease: "false"
-    apiVersion: v2
-    appVersion: 1.13.0
-    created: "2025-08-20T17:25:16.520651444+05:00"
-    description: Ingress controller for Kubernetes using NGINX as a reverse proxy
-      and load balancer
-    digest: 73c9231dc3abf69f98af02ea8a1eaaaa2cde3e53aa775eb1c5bcf79b0d4f9f78
-    home: https://github.com/kubernetes/ingress-nginx
-    icon: https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Nginx_logo.svg/500px-Nginx_logo.svg.png
-    keywords:
-    - ingress
-    - nginx
-    kubeVersion: '>=1.21.0-0'
-    maintainers:
-    - name: cpanato
-    - name: Gacko
-    - name: strongjz
-    - name: tao12345666333
-    name: ingress-nginx
-    sources:
-    - https://github.com/kubernetes/ingress-nginx
-    urls:
-    - charts/ingress-nginx-4.13.0.tgz
-    version: 4.13.0
-  kube-prometheus-stack:
-  - annotations:
-      artifacthub.io/license: Apache-2.0
-      artifacthub.io/links: |
-        - name: Chart Source
-          url: https://github.com/prometheus-community/helm-charts
-        - name: Upstream Project
-          url: https://github.com/prometheus-operator/kube-prometheus
-        - name: Upgrade Process
-          url: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/README.md#upgrading-chart
-      artifacthub.io/operator: "true"
-    apiVersion: v2
-    appVersion: v0.83.0
-    created: "2025-08-20T17:25:16.557261986+05:00"
+  miniapp:
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2025-08-20T17:42:34.846549296+05:00"
     dependencies:
-    - condition: crds.enabled
-      name: crds
-      repository: ""
-      version: 0.0.0
-    - condition: kubeStateMetrics.enabled
-      name: kube-state-metrics
+    - name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.7.19
+    - name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx/
+      version: 4.13.0
+    - name: kube-prometheus-stack
       repository: https://prometheus-community.github.io/helm-charts
-      version: 6.1.0
-    - condition: nodeExporter.enabled
-      name: prometheus-node-exporter
-      repository: https://prometheus-community.github.io/helm-charts
-      version: 4.47.3
-    - condition: grafana.enabled
-      name: grafana
-      repository: https://grafana.github.io/helm-charts
-      version: 9.3.0
-    - condition: windowsMonitoring.enabled
-      name: prometheus-windows-exporter
-      repository: https://prometheus-community.github.io/helm-charts
-      version: 0.12.*
-    description: kube-prometheus-stack collects Kubernetes manifests, Grafana dashboards,
-      and Prometheus rules combined with documentation and scripts to provide easy
-      to operate end-to-end Kubernetes cluster monitoring with Prometheus using the
-      Prometheus Operator.
-    digest: be82cbebf9ce6fcd0fa8e9d77ad1808054b76f7347e4afe7479d1daeb3991024
-    home: https://github.com/prometheus-operator/kube-prometheus
-    icon: https://raw.githubusercontent.com/prometheus/prometheus.github.io/master/assets/prometheus_logo-cb55bb5c346.png
-    keywords:
-    - operator
-    - prometheus
-    - kube-prometheus
-    kubeVersion: '>=1.25.0-0'
-    maintainers:
-    - email: andrew@quadcorps.co.uk
-      name: andrewgkew
-      url: https://github.com/andrewgkew
-    - email: gianrubio@gmail.com
-      name: gianrubio
-      url: https://github.com/gianrubio
-    - email: github.gkarthiks@gmail.com
-      name: gkarthiks
-      url: https://github.com/gkarthiks
-    - email: kube-prometheus-stack@sisti.pt
-      name: GMartinez-Sisti
-      url: https://github.com/GMartinez-Sisti
-    - email: github@jkroepke.de
-      name: jkroepke
-      url: https://github.com/jkroepke
-    - email: scott@r6by.com
-      name: scottrigby
-      url: https://github.com/scottrigby
-    - email: miroslav.hadzhiev@gmail.com
-      name: Xtigyro
-      url: https://github.com/Xtigyro
-    - email: quentin.bisson@gmail.com
-      name: QuentinBisson
-      url: https://github.com/QuentinBisson
-    name: kube-prometheus-stack
-    sources:
-    - https://github.com/prometheus-community/helm-charts
-    - https://github.com/prometheus-operator/kube-prometheus
+      version: 75.15.0
+    - name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 22.0.0
+    description: A Helm chart for Kubernetes
+    digest: 30928c33467c19abfb157f420207ac41355e4848bf1a1e7e0193df8faad000c2
+    name: miniapp
     type: application
     urls:
-    - charts/kube-prometheus-stack-75.15.0.tgz
-    version: 75.15.0
-  postgresql:
-  - annotations:
-      category: Database
-      images: |
-        - name: os-shell
-          image: docker.io/bitnami/os-shell:12-debian-12-r48
-        - name: postgres-exporter
-          image: docker.io/bitnami/postgres-exporter:0.17.1-debian-12-r12
-        - name: postgresql
-          image: docker.io/bitnami/postgresql:17.5.0-debian-12-r18
-      licenses: Apache-2.0
-      tanzuCategory: service
-    apiVersion: v2
-    appVersion: 17.5.0
-    created: "2025-08-20T17:25:16.562435786+05:00"
-    dependencies:
-    - name: common
-      repository: oci://registry-1.docker.io/bitnamicharts
-      tags:
-      - bitnami-common
-      version: 2.x.x
-    description: PostgreSQL (Postgres) is an open source object-relational database
-      known for reliability and data integrity. ACID-compliant, it supports foreign
-      keys, joins, views, triggers and stored procedures.
-    digest: 0608c3e711936c76e1520d9f68210bc9547a17cfef6f43fe9b9d4019038ef41d
-    home: https://bitnami.com
-    icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/postgresql/img/postgresql-stack-220x234.png
-    keywords:
-    - postgresql
-    - postgres
-    - database
-    - sql
-    - replication
-    - cluster
-    maintainers:
-    - name: Broadcom, Inc. All Rights Reserved.
-      url: https://github.com/bitnami/charts
-    name: postgresql
-    sources:
-    - https://github.com/bitnami/charts/tree/main/bitnami/postgresql
-    urls:
-    - charts/postgresql-16.7.19.tgz
-    version: 16.7.19
-  redis:
-  - annotations:
-      category: Database
-      images: |
-        - name: kubectl
-          image: docker.io/bitnami/kubectl:1.33.3-debian-12-r3
-        - name: os-shell
-          image: docker.io/bitnami/os-shell:12-debian-12-r50
-        - name: redis
-          image: docker.io/bitnami/redis:8.2.0-debian-12-r0
-        - name: redis-exporter
-          image: docker.io/bitnami/redis-exporter:1.74.0-debian-12-r4
-        - name: redis-sentinel
-          image: docker.io/bitnami/redis-sentinel:8.2.0-debian-12-r0
-      licenses: Apache-2.0
-      tanzuCategory: service
-    apiVersion: v2
-    appVersion: 8.2.0
-    created: "2025-08-20T17:25:16.569424517+05:00"
-    dependencies:
-    - name: common
-      repository: oci://registry-1.docker.io/bitnamicharts
-      tags:
-      - bitnami-common
-      version: 2.x.x
-    description: Redis(R) is an open source, advanced key-value store. It is often
-      referred to as a data structure server since keys can contain strings, hashes,
-      lists, sets and sorted sets.
-    digest: 5bebd83cd4cdfc099b9cefd3f907480a778ab64012017fa8f8b44ebe7973e370
-    home: https://bitnami.com
-    icon: https://dyltqmyl993wv.cloudfront.net/assets/stacks/redis/img/redis-stack-220x234.png
-    keywords:
-    - redis
-    - keyvalue
-    - database
-    maintainers:
-    - name: Broadcom, Inc. All Rights Reserved.
-      url: https://github.com/bitnami/charts
-    name: redis
-    sources:
-    - https://github.com/bitnami/charts/tree/main/bitnami/redis
-    urls:
-    - charts/redis-22.0.0.tgz
-    version: 22.0.0
-generated: "2025-08-20T17:25:16.514337829+05:00"
+    - miniapp-0.0.1.tgz
+    version: 0.0.1
+generated: "2025-08-20T17:42:34.798352333+05:00"
