@@ -58,6 +58,68 @@ postgresql:
               password VARCHAR(256) NOT NULL
           );
 
+          CREATE TABLE IF NOT EXISTS accounts (
+              id SERIAL PRIMARY KEY,
+              user_id INTEGER NOT NULL,
+              balance NUMERIC(15, 2) DEFAULT 0.00
+          );
+
+          CREATE TYPE IF NOT EXISTS order_status AS ENUM (
+              'pending',
+              'approved',
+              'canceled',
+              'delivered',
+          );
+
+          CREATE TABLE IF NOT EXISTS orders (
+              id SERIAL PRIMARY KEY,
+              user_id INTEGER NOT NULL,
+              items TEXT,
+              total_price NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+              status order_status DEFAULT 'pending',
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE TYPE IF NOT EXISTS payment_status AS ENUM (
+              'pending',
+              'ok',
+              'failed'
+          );
+
+          CREATE TABLE IF NOT EXISTS payments (
+              id SERIAL PRIMARY KEY,
+              account_id INTEGER NOT NULL,
+              order_id INTEGER NOT NULL,
+              balance_change NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+              status payment_status DEFAULT 'pending',
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE TABLE IF NOT EXISTS notifications (
+              id SERIAL PRIMARY KEY,
+              user_id INTEGER NOT NULL,
+              message TEXT,
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE TABLE IF NOT EXISTS stock (
+              id SERIAL PRIMARY KEY,
+              item_id INTEGER NOT NULL,
+              quantity INTEGER NOT NULL DEFAULT 0,
+              reserved INTEGER NOT NULL DEFAULT 0
+          );
+
+          CREATE TABLE IF NOT EXISTS items (
+              id SERIAL PRIMARY KEY,
+              name VARCHAR(256) NOT NULL,
+              description TEXT DEFAULT '',
+              price NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
   metrics:
     enabled: true
     service:
@@ -102,7 +164,7 @@ users:
     repository: maksonday
     name: users
     # This sets the pull policy for images.
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
   path: /api
@@ -112,9 +174,9 @@ auth:
     repository: maksonday
     name: auth-service
     # This sets the pull policy for images.
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test"
+    tag: "latest"
   path: /auth
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
