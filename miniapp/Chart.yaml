@@ -40,3 +40,6 @@ dependencies:
     version: "22.0.0"
     repository: "https://charts.bitnami.com/bitnami"
 
+  - name: "kafka"
+    version: "32.4.3"
+    repository: "https://charts.bitnami.com/bitnami"

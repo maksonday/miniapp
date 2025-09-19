@@ -29,3 +29,10 @@ spec:
               name: {{ include "miniapp.fullname" . }}-auth
               port:
                 number: {{ .Values.service.port }}
+        - path: {{ .Values.billing.path }}
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "miniapp.fullname" . }}-billing
+              port:
+                number: {{ .Values.service.port }}

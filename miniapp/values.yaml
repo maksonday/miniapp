@@ -60,7 +60,7 @@ postgresql:
 
           CREATE TABLE IF NOT EXISTS accounts (
               id SERIAL PRIMARY KEY,
-              user_id INTEGER NOT NULL,
+              user_id INTEGER NOT NULL CONSTRAINT fk_user REFERENCES users(id) ON DELETE CASCADE,
               balance NUMERIC(15, 2) DEFAULT 0.00
           );
 
@@ -158,13 +158,33 @@ kube-prometheus-stack:
 redis:
   architecture: standalone
 
+kafka:
+  listeners:
+    client:
+      protocol: PLAINTEXT
+  provisioning:
+    enabled: true
+    topics:
+      - name: payments
+        partitions: 3
+        replicas: 3
+      - name: payments-status
+        partitions: 3
+        replicas: 3
+      - name: notifications
+        partitions: 3
+        replicas: 3
+      - name: stock-changes
+        partitions: 3
+        replicas: 3
+
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 users:
   image:
     repository: maksonday
     name: users
     # This sets the pull policy for images.
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
   path: /api
@@ -174,10 +194,20 @@ auth:
     repository: maksonday
     name: auth-service
     # This sets the pull policy for images.
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
   path: /auth
+
+billing:
+  image:
+    repository: maksonday
+    name: billing
+    # This sets the pull policy for images.
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  path: /billing
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
