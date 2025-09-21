@@ -64,18 +64,17 @@ postgresql:
               balance NUMERIC(15, 2) DEFAULT 0.00
           );
 
-          CREATE TYPE IF NOT EXISTS order_status AS ENUM (
+          CREATE TYPE order_status AS ENUM (
               'pending',
               'approved',
               'canceled',
-              'delivered',
+              'delivered'
           );
 
           CREATE TABLE IF NOT EXISTS orders (
               id SERIAL PRIMARY KEY,
               user_id INTEGER NOT NULL,
               items TEXT,
-              total_price NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
               status order_status DEFAULT 'pending',
               ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -89,10 +88,10 @@ postgresql:
 
           CREATE TABLE IF NOT EXISTS payments (
               id SERIAL PRIMARY KEY,
-              account_id INTEGER NOT NULL,
               order_id INTEGER NOT NULL,
-              balance_change NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
+              amount NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
               status payment_status DEFAULT 'pending',
+              error VARCHAR(256) DEFAULT '',
               ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
@@ -204,9 +203,9 @@ billing:
     repository: maksonday
     name: billing
     # This sets the pull policy for images.
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "test8"
   path: /billing
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
