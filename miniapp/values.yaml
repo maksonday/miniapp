@@ -48,6 +48,7 @@ postgresql:
         init.sql: |
           CREATE DATABASE miniapp;
           \c miniapp;
+
           CREATE TABLE IF NOT EXISTS users (
               id SERIAL PRIMARY KEY,
               username VARCHAR(256) NOT NULL UNIQUE,
@@ -55,7 +56,8 @@ postgresql:
               lastname VARCHAR(256) NOT NULL,
               email VARCHAR(256) NOT NULL UNIQUE,
               phone VARCHAR(256) NOT NULL UNIQUE,
-              password VARCHAR(256) NOT NULL
+              password VARCHAR(256) NOT NULL,
+              roles VARCHAR(256) NOT NULL DEFAULT ''
           );
 
           CREATE TABLE IF NOT EXISTS accounts (
@@ -80,7 +82,7 @@ postgresql:
               mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
 
-          CREATE TYPE IF NOT EXISTS payment_status AS ENUM (
+          CREATE TYPE payment_status AS ENUM (
               'pending',
               'ok',
               'failed'
@@ -103,13 +105,6 @@ postgresql:
               ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
 
-          CREATE TABLE IF NOT EXISTS stock (
-              id SERIAL PRIMARY KEY,
-              item_id INTEGER NOT NULL,
-              quantity INTEGER NOT NULL DEFAULT 0,
-              reserved INTEGER NOT NULL DEFAULT 0
-          );
-
           CREATE TABLE IF NOT EXISTS items (
               id SERIAL PRIMARY KEY,
               name VARCHAR(256) NOT NULL,
@@ -118,6 +113,28 @@ postgresql:
               ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
+
+          CREATE TABLE IF NOT EXISTS stock (
+              id SERIAL PRIMARY KEY,
+              item_id INTEGER NOT NULL,
+              quantity INTEGER NOT NULL DEFAULT 0,
+              reserved INTEGER NOT NULL DEFAULT 0
+          );
+
+          CREATE TYPE stock_action AS ENUM (
+              'add',
+              'remove',
+              'reserve'
+          );
+
+          CREATE TABLE IF NOT EXISTS stock_changes (
+              id SERIAL PRIMARY KEY,
+              stock_id INTEGER NOT NULL,
+              action stock_action default 'add',
+              quantity INTEGER NOT NULL DEFAULT 0,
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+         
 
   metrics:
     enabled: true
@@ -195,7 +212,7 @@ auth:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "test1"
   path: /auth
 
 billing:
@@ -207,6 +224,17 @@ billing:
     # Overrides the image tag whose default is the chart appVersion.
     tag: "test8"
   path: /billing
+
+stock:
+  image:
+    repository: maksonday
+    name: stock
+    # This sets the pull policy for images.
+    pullPolicy: Always
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "test"
+  path: /stock
+
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []

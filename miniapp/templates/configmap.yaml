@@ -57,7 +57,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/billing-service.log"
+    log-file = "/var/log/billing.log"
     log-level = "info"
     listen-port = "8000"
     base-path = "{{ .Values.billing.path }}"
@@ -90,3 +90,29 @@ data:
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
     {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "miniapp.fullname" . }}-cm-stock
+  namespace: {{ .Release.Namespace }}
+data:
+  app-config: |
+    log-file = "/var/log/stock.log"
+    log-level = "info"
+    listen-port = "8000"
+    auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
+    base-path = "{{ .Values.stock.path }}"
+
+    [db-config]
+    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-config]
+    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
