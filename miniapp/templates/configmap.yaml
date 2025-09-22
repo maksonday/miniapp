@@ -75,7 +75,7 @@ data:
     port = 6379
 
     [consumer-config]
-    topics = ["payments"]
+    topic = "payments"
     group-id = "payments"
     version = "4.0.0"
     brokers = [{{- $rn := .Release.Name -}}
@@ -84,7 +84,7 @@ data:
     {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [producer-config]
-    topics = ["payments_status"]
+    topic = "payments_status"
     version = "4.0.0"
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
@@ -116,3 +116,20 @@ data:
     [redis-config]
     host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
     port = 6379
+
+    [consumer-config]
+    topic = "stock_changes"
+    group-id = "stock_changes"
+    version = "4.0.0"
+    brokers = [{{- $rn := .Release.Name -}}
+    {{- $ns := .Release.Namespace -}}
+    {{- $port := int .Values.kafka.service.ports.client -}}
+    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+
+    [producer-config]
+    topic = "stock_changes_status"
+    version = "4.0.0"
+    brokers = [{{- $rn := .Release.Name -}}
+    {{- $ns := .Release.Namespace -}}
+    {{- $port := int .Values.kafka.service.ports.client -}}
+    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]

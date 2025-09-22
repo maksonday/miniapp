@@ -117,22 +117,30 @@ postgresql:
           CREATE TABLE IF NOT EXISTS stock (
               id SERIAL PRIMARY KEY,
               item_id INTEGER NOT NULL,
-              quantity INTEGER NOT NULL DEFAULT 0,
-              reserved INTEGER NOT NULL DEFAULT 0
+              quantity INTEGER NOT NULL DEFAULT 0
           );
 
           CREATE TYPE stock_action AS ENUM (
               'add',
-              'remove',
-              'reserve'
+              'remove'
+          );
+
+          CREATE TYPE stock_change_status AS ENUM (
+              'pending',
+              'ok',
+              'failed'
           );
 
           CREATE TABLE IF NOT EXISTS stock_changes (
               id SERIAL PRIMARY KEY,
+              order_id INTEGER NOT NULL,
               stock_id INTEGER NOT NULL,
-              action stock_action default 'add',
+              action stock_action DEFAULT 'add',
+              status stock_change_status DEFAULT 'pending',
               quantity INTEGER NOT NULL DEFAULT 0,
-              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              error VARCHAR(256) DEFAULT '',
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
          
 
@@ -184,13 +192,16 @@ kafka:
       - name: payments
         partitions: 3
         replicas: 3
-      - name: payments-status
+      - name: payments_status
         partitions: 3
         replicas: 3
       - name: notifications
         partitions: 3
         replicas: 3
-      - name: stock-changes
+      - name: stock_changes
+        partitions: 3
+        replicas: 3
+      - name: stock_changes_status
         partitions: 3
         replicas: 3
 
@@ -220,9 +231,9 @@ billing:
     repository: maksonday
     name: billing
     # This sets the pull policy for images.
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test8"
+    tag: "test9"
   path: /billing
 
 stock:
@@ -230,9 +241,9 @@ stock:
     repository: maksonday
     name: stock
     # This sets the pull policy for images.
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test"
+    tag: "test5"
   path: /stock
 
 
