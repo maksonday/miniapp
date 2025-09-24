@@ -43,3 +43,17 @@ spec:
               name: {{ include "miniapp.fullname" . }}-stock
               port:
                 number: {{ .Values.service.port }}
+        - path: {{ .Values.order.path }}
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "miniapp.fullname" . }}-order
+              port:
+                number: {{ .Values.service.port }}
+        - path: {{ .Values.notifications.path }}
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "miniapp.fullname" . }}-notifications
+              port:
+                number: {{ .Values.service.port }}

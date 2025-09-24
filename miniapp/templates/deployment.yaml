@@ -475,3 +475,243 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "miniapp.fullname" . }}-order
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-order
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- if .Values.rollingUpdate.enabled }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ div .Values.replicaCount 2 }}
+      maxUnavailable: {{ div .Values.replicaCount 2 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "miniapp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ include "miniapp.fullname" . }}-order
+        {{- include "miniapp.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "miniapp.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "{{ .Chart.Name }}-order"
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ printf "%s/%s:%s"  .Values.order.image.repository .Values.order.image.name .Values.order.image.tag }}
+          imagePullPolicy: {{ .Values.order.image.pullPolicy }}
+          ports:
+          - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.order.path }}/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.order.path }}/health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          - name: {{ include "miniapp.fullname" . }}-volume
+            mountPath: /usr/local/etc
+          - name: {{ .Values.postgresql.auth.existingSecret }}
+            mountPath: "/secret/postgres"
+            readOnly: true
+          - name: {{ .Values.redis.auth.existingSecret }}
+            mountPath: "/secret/redis"
+            readOnly: true
+          - name: {{ .Values.auth.existingSecret }}
+            mountPath: /keys
+      volumes:
+        - name: {{ include "miniapp.fullname" . }}-volume
+          configMap:
+            name: {{ include "miniapp.fullname" . }}-cm-order
+            items:
+            - key: app-config
+              path: order.conf
+        - name: {{ .Values.postgresql.auth.existingSecret }}
+          secret:
+            secretName: {{ .Values.postgresql.auth.existingSecret }}
+            items:
+            - key: postgres-password
+              path: password
+        - name: {{ .Values.auth.existingSecret }}
+          secret:
+            secretName: {{ .Values.auth.existingSecret }}
+            items:
+            - key: public-key
+              path: cert.pem.pub
+        - name: {{ .Values.redis.auth.existingSecret }}
+          secret:
+            secretName: {{ .Values.redis.auth.existingSecret }}
+            items:
+            - key: redis-password
+              path: password
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "miniapp.fullname" . }}-notifications
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-notifications
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  {{- if .Values.rollingUpdate.enabled }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ div .Values.replicaCount 2 }}
+      maxUnavailable: {{ div .Values.replicaCount 2 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "miniapp.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: {{ include "miniapp.fullname" . }}-notifications
+        {{- include "miniapp.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "miniapp.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: "{{ .Chart.Name }}-notifications"
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ printf "%s/%s:%s"  .Values.notifications.image.repository .Values.notifications.image.name .Values.notifications.image.tag }}
+          imagePullPolicy: {{ .Values.notifications.image.pullPolicy }}
+          ports:
+          - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.notifications.path }}/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.notifications.path }}/health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          - name: {{ include "miniapp.fullname" . }}-volume
+            mountPath: /usr/local/etc
+          - name: {{ .Values.postgresql.auth.existingSecret }}
+            mountPath: "/secret/postgres"
+            readOnly: true
+          - name: {{ .Values.redis.auth.existingSecret }}
+            mountPath: "/secret/redis"
+            readOnly: true
+          - name: {{ .Values.auth.existingSecret }}
+            mountPath: /keys
+      volumes:
+        - name: {{ include "miniapp.fullname" . }}-volume
+          configMap:
+            name: {{ include "miniapp.fullname" . }}-cm-notifications
+            items:
+            - key: app-config
+              path: notifications.conf
+        - name: {{ .Values.postgresql.auth.existingSecret }}
+          secret:
+            secretName: {{ .Values.postgresql.auth.existingSecret }}
+            items:
+            - key: postgres-password
+              path: password
+        - name: {{ .Values.auth.existingSecret }}
+          secret:
+            secretName: {{ .Values.auth.existingSecret }}
+            items:
+            - key: public-key
+              path: cert.pem.pub
+        - name: {{ .Values.redis.auth.existingSecret }}
+          secret:
+            secretName: {{ .Values.redis.auth.existingSecret }}
+            items:
+            - key: redis-password
+              path: password
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
