@@ -11,7 +11,7 @@
 5) Order - сервис заказа
 6) Notifications - сервис уведомлений
 
-Спеки OpenAPI и AsyncAPI, которые показывают взаимодействие сервисов, можно изучить в папке [spec](./spec).
+Спеки OpenAPI и AsyncAPI сервисов можно изучить в папке [spec](./spec).
 
 Примеры запросов и ответов можно посмотреть в [тестах](./miniapp/tests/services_rest_postman_collection.json)
 
