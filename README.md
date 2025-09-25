@@ -117,7 +117,9 @@ sequenceDiagram
 
     O->>N: publish notification (уведомление пользователю)
     N-->>U: Отправка письма/сообщения
-    
+```
+
+```mermaid
 sequenceDiagram
     participant U as User
     participant O as Order
@@ -131,7 +133,9 @@ sequenceDiagram
 
     O->>N: publish notification (сообщение о неуспехе)
     N-->>U: уведомление: заказ не создан
+```
 
+```mermaid
 sequenceDiagram
     participant U as User
     participant O as Order
