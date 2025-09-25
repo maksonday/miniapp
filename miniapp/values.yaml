@@ -107,6 +107,7 @@ postgresql:
           CREATE TABLE IF NOT EXISTS notifications (
               id SERIAL PRIMARY KEY,
               user_id INTEGER NOT NULL,
+              order_id INTEGER NOT NULL,
               message TEXT,
               ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
@@ -263,7 +264,7 @@ notifications:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test2"
+    tag: "test3"
   path: /notifications
 
 order:
@@ -273,7 +274,7 @@ order:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test6"
+    tag: "test7"
   path: /order
 
 
