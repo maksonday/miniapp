@@ -1,0 +1,1186 @@
+{
+	"info": {
+		"_postman_id": "f432850c-e111-440c-8fc9-d8ee9054cea4",
+		"name": "services_rest",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25646654"
+	},
+	"item": [
+		{
+			"name": "login as admin",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains refresh token in cookie and access token in header\", function () {\r",
+							"    const refresh_token = pm.response.headers.get(\"Set-Cookie\");\r",
+							"    const authHeader = pm.response.headers.get(\"Authorization\"); // Corrected header name\r",
+							"\r",
+							"    pm.expect(refresh_token).to.exist.and.to.match(/refresh_token=.+/);\r",
+							"    pm.expect(authHeader).to.exist.and.to.match(/Bearer .+/); // Added check for undefined\r",
+							"\r",
+							"    if (authHeader) {\r",
+							"        pm.environment.set(\"authorization_admin\", authHeader);\r",
+							"    }\r",
+							"    if (refresh_token) {\r",
+							"        pm.environment.set(\"refresh_token_admin\", refresh_token);\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"admin\",\r\n    \"password\": \"Qwerty1234!@\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/login",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check initial balance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \", pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains balance field and equals environment variable 'balance'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseBody).to.have.property('balance');\r",
+							"    pm.expect(responseBody.balance).to.equal(0);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/billing/get_balance",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"billing",
+						"get_balance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add item1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"console.log(\"Response body: \", pm.response.json());\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains id\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.have.property('id');\r",
+							"    pm.environment.set(\"item1_id\", responseBody.id);\r",
+							"    // parse request body, retrieve property price and set in to environment variable \"item1_price\"\r",
+							"    const requestBody = pm.request.body.raw;\r",
+							"    const parsedRequestBody = JSON.parse(requestBody);\r",
+							"    pm.environment.set(\"item1_price\", parsedRequestBody.price);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"apple\",\r\n    \"description\": \"test1\",\r\n    \"price\": 100.00\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/stock/add_item",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"add_item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add item2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"console.log(\"Response body: \", pm.response.json());\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains id\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.have.property('id');\r",
+							"    pm.environment.set(\"item2_id\", responseBody.id);\r",
+							"    // parse request body, retrieve property price and set in to environment variable \"item2_price\"\r",
+							"    const requestBody = pm.request.body.raw;\r",
+							"    const parsedRequestBody = JSON.parse(requestBody);\r",
+							"    pm.environment.set(\"item2_price\", parsedRequestBody.price);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"banana\",\r\n    \"description\": \"test2\",\r\n    \"price\": 200.00\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/stock/add_item",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"add_item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add item3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"console.log(\"Response body: \", pm.response.json());\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains id\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.have.property('id');\r",
+							"    pm.environment.set(\"item3_id\", responseBody.id);\r",
+							"    // parse request body, retrieve property price and set in to environment variable \"item3_price\"\r",
+							"    const requestBody = pm.request.body.raw;\r",
+							"    const parsedRequestBody = JSON.parse(requestBody);\r",
+							"    pm.environment.set(\"item3_price\", parsedRequestBody.price);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"melon\",\r\n    \"description\": \"test3\",\r\n    \"price\": 300.00\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/stock/add_item",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"add_item"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add item1 to stock",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"item_id\": 1,\r\n    \"action\": 0,\r\n    \"quantity\": 10\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/stock/stock_change",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"stock_change"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add item2 to stock",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"item_id\": 2,\r\n    \"action\": 0,\r\n    \"quantity\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/stock/stock_change",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"stock_change"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add item3 to stock",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"item_id\": 3,\r\n    \"action\": 0,\r\n    \"quantity\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/stock/stock_change",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"stock_change"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check stock before order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains valid items with expected quantities\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseBody).to.be.an(\"array\").with.lengthOf(3);\r",
+							"\r",
+							"    const expectedQuantities = {\r",
+							"        1: 10,\r",
+							"        2: 10,\r",
+							"        3: 10\r",
+							"    };\r",
+							"\r",
+							"    // Преобразуем массив ответа в объект по id\r",
+							"    const responseMap = responseBody.reduce((acc, item) => {\r",
+							"        acc[item.id] = item.quantity;\r",
+							"        return acc;\r",
+							"    }, {});\r",
+							"\r",
+							"    // Проверяем все ожидаемые значения\r",
+							"    Object.entries(expectedQuantities).forEach(([id, expected]) => {\r",
+							"        pm.test(`Item ID ${id} matches expected values`, function () {\r",
+							"            pm.expect(responseMap).to.have.property(id);\r",
+							"            const item = responseMap[id];\r",
+							"            pm.expect(item.name).to.equal(expected.name);\r",
+							"            pm.expect(item.price).to.equal(expected.price);\r",
+							"        });\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/stock/get_items",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"get_items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add money",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"amount\": 1000.00\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/billing/add_money",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"billing",
+						"add_money"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create order ok",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 201\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(201);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"id\": 1,\r\n            \"quantity\": 2\r\n        },\r\n        {\r\n            \"id\": 2,\r\n            \"quantity\": 3\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/order/create_order",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						"create_order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check stock after ok order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains valid items with expected quantities\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseBody).to.be.an(\"array\").with.lengthOf(3);\r",
+							"\r",
+							"    const expectedQuantities = {\r",
+							"        1: 8,\r",
+							"        2: 7,\r",
+							"        3: 10\r",
+							"    };\r",
+							"\r",
+							"    // Преобразуем массив ответа в объект по id\r",
+							"    const responseMap = responseBody.reduce((acc, item) => {\r",
+							"        acc[item.id] = item.quantity; // приводим id к строке\r",
+							"        return acc;\r",
+							"    }, {});\r",
+							"\r",
+							"    // Проверяем все ожидаемые значения\r",
+							"    Object.entries(expectedQuantities).forEach(([id, expected]) => {\r",
+							"        pm.test(`Item ID ${id} matches expected values`, function () {\r",
+							"            pm.expect(responseMap).to.have.property(id);\r",
+							"            const item = responseMap[id];\r",
+							"            pm.expect(item.name).to.equal(expected.name);\r",
+							"            pm.expect(item.price).to.equal(expected.price);\r",
+							"        });\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/stock/get_items",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"get_items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check balance after order ok",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains balance field and equals environment variable 'balance'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseBody).to.have.property('balance');\r",
+							"    pm.expect(responseBody.balance).to.equal(1000 - 2 * 100 - 3 * 200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/billing/get_balance",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"billing",
+						"get_balance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check notify order ok",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains element with message field that includes the substring 'approved'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"\r",
+							"    pm.expect(Array.isArray(responseBody)).to.be.true; // Check if response is an array\r",
+							"\r",
+							"    const containsApprovedMessage = responseBody.some(item => \r",
+							"        item.hasOwnProperty('message') && \r",
+							"        typeof item.message === 'string' && \r",
+							"        item.message.includes('approved')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(containsApprovedMessage).to.be.true;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/notifications/get_notifications",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications",
+						"get_notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create order insufficient funds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 201\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(201);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"items\": [\r\n        {\r\n            \"id\": 1,\r\n            \"quantity\": 4 \r\n        },\r\n        {\r\n            \"id\": 2,\r\n            \"quantity\": 3\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/order/create_order",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						"create_order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check stock after insufficient funds order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains valid items with expected quantities\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseBody).to.be.an(\"array\").with.lengthOf(3);\r",
+							"\r",
+							"    const expectedQuantities = {\r",
+							"        1: 8,\r",
+							"        2: 7,\r",
+							"        3: 10\r",
+							"    };\r",
+							"\r",
+							"    // Преобразуем массив ответа в объект по id\r",
+							"    const responseMap = responseBody.reduce((acc, item) => {\r",
+							"        acc[item.id] = item.quantity; // приводим id к строке\r",
+							"        return acc;\r",
+							"    }, {});\r",
+							"\r",
+							"    // Проверяем все ожидаемые значения\r",
+							"    Object.entries(expectedQuantities).forEach(([id, expected]) => {\r",
+							"    pm.test(`Item ID ${id} matches expected values`, function () {\r",
+							"        pm.expect(responseMap).to.have.property(id);\r",
+							"        const item = responseMap[id];\r",
+							"        pm.expect(item.name).to.equal(expected.name);\r",
+							"        pm.expect(item.price).to.equal(expected.price);\r",
+							"    });\r",
+							"});\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/stock/get_items",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"get_items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check balance after insufficient funds order",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains balance field and equals environment variable 'balance'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseBody).to.have.property('balance');\r",
+							"    pm.expect(responseBody.balance).to.equal(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/billing/get_balance",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"billing",
+						"get_balance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check notify order cancel for insufficient funds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains element with message field that includes the substring 'canceled'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"\r",
+							"    pm.expect(Array.isArray(responseBody)).to.be.true; // Check if response is an array\r",
+							"\r",
+							"    const containsApprovedMessage = responseBody.some(item => \r",
+							"        item.hasOwnProperty('message') && \r",
+							"        typeof item.message === 'string' && \r",
+							"        item.message.includes('canceled')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(containsApprovedMessage).to.be.true;\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/notifications/get_notifications",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications",
+						"get_notifications"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "arch.homework",
+			"type": "string"
+		}
+	]
+}

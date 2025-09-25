@@ -13,7 +13,7 @@
 
 Спеки OpenAPI и AsyncAPI сервисов можно изучить в папке [spec](./spec).
 
-Примеры запросов и ответов можно посмотреть в [тестах](./miniapp/tests/services_rest_postman_collection.json)
+Примеры запросов и ответов можно посмотреть в [тестах](./miniapp/tests)
 
 ## Схема авторизации и аутентификации на примере сервиса Users
 
@@ -221,5 +221,6 @@ helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSe
 ## Тестирование
 
 ```bash
-newman run miniapp/tests/services_rest_postman_collection.json
+newman run miniapp/tests/services_rest.postman_collection.json --delay-request 5000 # тестируем заказ
+newman run miniapp/tests/auth_and_api.postman_collection.json # тестируем создание пользователя и аккаунта + авторизацию и аутентификацию
 ```
