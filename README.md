@@ -190,7 +190,7 @@ data:
   redis-password: UXdlcnR5MTIzNCFA
 ```
 
-3) Секрет с приватными и публичным ключами для сервиса аутентификации, например:
+3) Секрет с приватным и публичным ключами для сервиса аутентификации, например:
 
 ```yaml
 apiVersion: v1
@@ -217,5 +217,5 @@ helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSe
 ## Тестирование
 
 ```bash
-newman run miniapp/tests/auth_and_api_postman_collection.json
+newman run miniapp/tests/services_rest_postman_collection.json
 ```
