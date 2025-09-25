@@ -210,6 +210,13 @@ data:
     ...
 ```
 
+Можно взять для тестирования готовые секреты из манифестов и применить их
+
+```bash
+kubectl create namespace miniapp
+kubectl apply -f manifests/ -n miniapp
+```
+
 
 Секреты должен находиться в том же namespace, что и устанавливаемый chart
 
