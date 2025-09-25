@@ -264,7 +264,7 @@ notifications:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test3"
+    tag: "test4"
   path: /notifications
 
 order:
@@ -274,7 +274,7 @@ order:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test7"
+    tag: "test8"
   path: /order
 
 

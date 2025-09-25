@@ -89,3 +89,67 @@ helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSe
 ```bash
 newman run miniapp/tests/auth_and_api_postman_collection.json
 ```
+
+# Order Saga – Sequence Diagrams
+
+Взаимодействие сервисов **Order**, **Warehouse**, **Billing** и **Notification**  
+через Kafka (события) и REST API (инициация).
+
+---
+
+## 1. Основной сценарий (happy path)
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant O as Order
+    participant W as Warehouse
+    participant B as Billing
+    participant N as Notification
+
+    U->>O: POST /orders (создать заказ)
+    
+    O->>W: publish stock_changes (резервировать товары)
+    W-->>O: publish stock_changes_status (успех)
+
+    O->>B: publish payments (списать деньги)
+    B-->>O: publish payments_status (успех)
+
+    O->>N: publish notification (уведомление пользователю)
+    N-->>U: Отправка письма/сообщения
+
+sequenceDiagram
+    participant U as User
+    participant O as Order
+    participant W as Warehouse
+    participant N as Notification
+
+    U->>O: POST /orders
+    
+    O->>W: publish stock_changes (резервировать товары)
+    W-->>O: publish stock_changes_status (ошибка)
+
+    O->>N: publish notification (сообщение о неуспехе)
+    N-->>U: уведомление: заказ не создан
+
+sequenceDiagram
+    participant U as User
+    participant O as Order
+    participant W as Warehouse
+    participant B as Billing
+    participant N as Notification
+
+    U->>O: POST /orders
+    
+    O->>W: publish stock_changes (резервировать товары)
+    W-->>O: publish stock_changes_status (успех)
+
+    O->>B: publish payments (списать деньги)
+    B-->>O: publish payments_status (ошибка)
+
+    O->>W: publish stock_changes (отмена резервации)
+    W-->>O: publish stock_changes_status (успех/отмена)
+
+    O->>N: publish notification (сообщение о неуспехе)
+    N-->>U: уведомление: заказ не оплачен
+
