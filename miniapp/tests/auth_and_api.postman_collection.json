@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "f432850c-e111-440c-8fc9-d8ee9054cea4",
-		"name": "auth and api",
+		"_postman_id": "5b89b40a-9bdc-497d-a3a9-7d7f8e61b5f3",
+		"name": "auth_and_api",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "25646654"
 	},
@@ -36,7 +36,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -60,6 +61,60 @@
 					"path": [
 						"auth",
 						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check initial balance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \", pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body contains balance field and equals environment variable 'balance'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseBody).to.have.property('balance');\r",
+							"    pm.expect(responseBody.balance).to.equal(0);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization1}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/billing/get_balance",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"billing",
+						"get_balance"
 					]
 				}
 			},
@@ -257,7 +312,8 @@
 							"});"
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -308,7 +364,8 @@
 							""
 						],
 						"type": "text/javascript",
-						"packages": {}
+						"packages": {},
+						"requests": {}
 					}
 				}
 			],
@@ -678,6 +735,7 @@
 			"script": {
 				"type": "text/javascript",
 				"packages": {},
+				"requests": {},
 				"exec": [
 					""
 				]
@@ -688,6 +746,7 @@
 			"script": {
 				"type": "text/javascript",
 				"packages": {},
+				"requests": {},
 				"exec": [
 					""
 				]
@@ -697,8 +756,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "arch.homework",
-			"type": "string"
+			"value": "arch.homework"
 		}
 	]
 }

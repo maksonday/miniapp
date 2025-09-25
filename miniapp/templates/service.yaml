@@ -33,3 +33,79 @@ spec:
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-auth
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "miniapp.fullname" . }}-billing
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-billing
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+  selector:
+    {{- include "miniapp.selectorLabels" . | nindent 4 }}
+    app: {{ include "miniapp.fullname" . }}-billing
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "miniapp.fullname" . }}-stock
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-stock
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+  selector:
+    {{- include "miniapp.selectorLabels" . | nindent 4 }}
+    app: {{ include "miniapp.fullname" . }}-stock
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "miniapp.fullname" . }}-order
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-order
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+  selector:
+    {{- include "miniapp.selectorLabels" . | nindent 4 }}
+    app: {{ include "miniapp.fullname" . }}-order
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "miniapp.fullname" . }}-notifications
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-notifications
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+  selector:
+    {{- include "miniapp.selectorLabels" . | nindent 4 }}
+    app: {{ include "miniapp.fullname" . }}-notifications

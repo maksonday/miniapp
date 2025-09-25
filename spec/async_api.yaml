@@ -1,0 +1,142 @@
+asyncapi: '2.6.0'
+info:
+  title: Order Saga
+  version: '1.0.0'
+  description: >
+    Асинхронное взаимодействие сервисов "Заказ", "Склад", "Биллинг" и "Уведомления"
+    через Kafka. Используется паттерн Сага.
+
+servers:
+  kafka-broker:
+    url: localhost:9092
+    protocol: kafka
+
+channels:
+  stock_changes:
+    description: Заказ → Склад. Сообщение о резервировании/отмене товара.
+    publish:
+      operationId: orderPublishStockChange
+      summary: Order service отправляет запрос на изменение склада
+      message:
+        $ref: '#/components/messages/StockChangeMessage'
+    subscribe:
+      operationId: warehouseConsumeStockChange
+      summary: Warehouse service получает запрос на изменение склада
+      message:
+        $ref: '#/components/messages/StockChangeMessage'
+
+  stock_changes_status:
+    description: Склад → Заказ. Ответ о статусе изменения склада.
+    publish:
+      operationId: warehousePublishStockChangeStatus
+      summary: Warehouse service отправляет статус операции
+      message:
+        $ref: '#/components/messages/StockChangeMessage'
+    subscribe:
+      operationId: orderConsumeStockChangeStatus
+      summary: Order service получает статус операции
+      message:
+        $ref: '#/components/messages/StockChangeMessage'
+
+  payments:
+    description: Заказ → Биллинг. Запрос на проведение платежа.
+    publish:
+      operationId: orderPublishPayment
+      summary: Order service отправляет запрос на платеж
+      message:
+        $ref: '#/components/messages/PaymentMessage'
+    subscribe:
+      operationId: billingConsumePayment
+      summary: Billing service получает запрос на платеж
+      message:
+        $ref: '#/components/messages/PaymentMessage'
+
+  payments_status:
+    description: Биллинг → Заказ. Ответ о статусе платежа.
+    publish:
+      operationId: billingPublishPaymentStatus
+      summary: Billing service отправляет результат платежа
+      message:
+        $ref: '#/components/messages/PaymentMessage'
+    subscribe:
+      operationId: orderConsumePaymentStatus
+      summary: Order service получает результат платежа
+      message:
+        $ref: '#/components/messages/PaymentMessage'
+
+  notification:
+    description: Заказ → Уведомления. Сообщение для рассылки пользователю.
+    publish:
+      operationId: orderPublishNotification
+      summary: Order service отправляет сообщение для пользователя
+      message:
+        $ref: '#/components/messages/NotificationMessage'
+    subscribe:
+      operationId: notificationConsumeNotification
+      summary: Notification service получает сообщение и делает рассылку
+      message:
+        $ref: '#/components/messages/NotificationMessage'
+
+components:
+  messages:
+    StockChangeMessage:
+      name: StockChangeMessage
+      title: Stock change event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          stock_change_ids:
+            type: array
+            items:
+              type: integer
+              format: int64
+          order_id:
+            type: integer
+            format: int64
+          action:
+            type: integer
+            format: int8
+          status:
+            type: integer
+            format: int8
+            description: 0 - pending, 1 - ok, 2 - failed
+
+    PaymentMessage:
+      name: PaymentMessage
+      title: Payment event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          payment_id:
+            type: integer
+            format: int64
+          order_id:
+            type: integer
+            format: int64
+          stock_change_ids:
+            type: array
+            items:
+              type: integer
+              format: int64
+          action:
+            type: integer
+            format: int8
+          status:
+            type: integer
+            format: int8
+            description: 0 - pending, 1 - ok, 2 - failed
+
+    NotificationMessage:
+      name: NotificationMessage
+      title: Notification event
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          user_id:
+            type: integer
+            format: int64
+          message:
+            type: string
