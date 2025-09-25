@@ -81,7 +81,7 @@
 
 В данной секции описан механизм обработки заказа при помощи паттерна Saga.
 
-Взаимодействие сервисов **Users**, **Auth**, **Order**, **Stock**, **Billing** и **Notifications** через Kafka и REST API.
+Взаимодействие сервисов **Users**, **Auth**, **Order**, **Stock**, **Billing** и **Notifications** через Kafka и REST API с использованием событий в качестве сообщений.
 
 ---
 

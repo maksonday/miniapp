@@ -55,7 +55,7 @@ postgresql:
               firstname VARCHAR(256) NOT NULL,
               lastname VARCHAR(256) NOT NULL,
               email VARCHAR(256) NOT NULL UNIQUE,
-              phone VARCHAR(256) NOT NULL UNIQUE,
+              phone VARCHAR(256) NOT NULL,
               password VARCHAR(256) NOT NULL,
               roles VARCHAR(256) NOT NULL DEFAULT ''
           );
@@ -65,6 +65,19 @@ postgresql:
               user_id INTEGER NOT NULL CONSTRAINT fk_user REFERENCES users(id) ON DELETE CASCADE,
               balance NUMERIC(15, 2) DEFAULT 0.00
           );
+
+          DO $$
+          DECLARE
+              new_user_id INT;
+          BEGIN
+              INSERT INTO users(username, firstname, lastname, email, phone, password, roles)
+              VALUES('admin', 'admin', 'admin', 'admin', 'admin', '$2a$14$jNlzJW/11dcIXyWMD215JeWTrNDsV5ztpF/dmHBL.I1QiB5QAwi8y', 'admin')
+              RETURNING id INTO new_user_id;
+
+              INSERT INTO accounts(user_id)
+              VALUES (new_user_id);
+          END
+          $$;
 
           CREATE TYPE order_status AS ENUM (
               'pending',
