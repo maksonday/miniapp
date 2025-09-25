@@ -117,7 +117,7 @@ sequenceDiagram
 
     O->>N: publish notification (уведомление пользователю)
     N-->>U: Отправка письма/сообщения
-
+    
 sequenceDiagram
     participant U as User
     participant O as Order
@@ -152,4 +152,5 @@ sequenceDiagram
 
     O->>N: publish notification (сообщение о неуспехе)
     N-->>U: уведомление: заказ не оплачен
+```
 
