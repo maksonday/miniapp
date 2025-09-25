@@ -13,7 +13,7 @@
 
 Спеки OpenAPI и AsyncAPI, которые показывают взаимодействие сервисов, можно изучить в папке [spec](./spec).
 
-Примеры запросов и ответов можно посмотреть в [тестах](./miniapp/tests/auth_and_api_postman_collection.json)
+Примеры запросов и ответов можно посмотреть в [тестах](./miniapp/tests/services_rest_postman_collection.json)
 
 ## Схема авторизации и аутентификации на примере сервиса Users
 
