@@ -83,6 +83,8 @@ postgresql:
               'pending',
               'approved',
               'canceled',
+              'waiting_for_cour',
+              'delivery',
               'delivered'
           );
 
@@ -90,6 +92,10 @@ postgresql:
               id SERIAL PRIMARY KEY,
               user_id INTEGER NOT NULL,
               items TEXT,
+              hour_mask BIGINT NOT NULL DEFAULT 0,
+              start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              end_time TIMESTAMP DEFAULT NULL,
+              error VARCHAR(256) DEFAULT '',
               status order_status DEFAULT 'pending',
               ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -162,6 +168,44 @@ postgresql:
               ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
               mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
+
+          CREATE TABLE IF NOT EXISTS couriers(
+              id SERIAL PRIMARY KEY,
+              user_id INTEGER NOT NULL
+          );
+
+          CREATE TABLE IF NOT EXISTS courier_schedule(
+              id SERIAL PRIMARY KEY,
+              courier_id INTEGER NOT NULL,
+              work_date DATE DEFAULT CURRENT_DATE,
+              hour_mask BIGINT NOT NULL DEFAULT 0,
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+          CREATE TYPE cour_reserve_status as ENUM(
+              'pending',
+              'ok',
+              'failed'
+          );
+
+          CREATE TYPE cour_reserve_action as ENUM(
+              'revert_reserve',
+              'reserve'
+          );
+
+          CREATE TABLE IF NOT EXISTS courier_reservation(
+              id SERIAL PRIMARY KEY,
+              order_id INTEGER NOT NULL,
+              courier_id INTEGER NOT NULL,
+              action cour_reserve_action DEFAULT 'revert_reserve',
+              status cour_reserve_status DEFAULT 'pending',
+              work_date DATE DEFAULT CURRENT_DATE,
+              hour_mask BIGINT NOT NULL DEFAULT 0,
+              error VARCHAR(256) DEFAULT '',
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
          
 
   metrics:
@@ -227,6 +271,12 @@ kafka:
       - name: notifications
         partitions: 3
         replicas: 3
+      - name: cour_reserve
+        partitions: 3
+        replicas: 3
+      - name: cour_reserve_status
+        partitions: 3
+        replicas: 3
 
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
@@ -257,7 +307,7 @@ billing:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test15"
+    tag: "test16"
   path: /billing
 
 stock:
@@ -267,7 +317,7 @@ stock:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test19"
+    tag: "test20"
   path: /stock
 
 notifications:
@@ -287,9 +337,19 @@ order:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test8"
+    tag: "test14"
   path: /order
 
+
+delivery:
+  image:
+    repository: maksonday
+    name: delivery
+    # This sets the pull policy for images.
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "test8"
+  path: /delivery
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []

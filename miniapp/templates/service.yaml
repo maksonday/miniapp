@@ -109,3 +109,22 @@ spec:
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-notifications
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "miniapp.fullname" . }}-delivery
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "miniapp.labels" . | nindent 4 }}-delivery
+spec:
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 8000
+  selector:
+    {{- include "miniapp.selectorLabels" . | nindent 4 }}
+    app: {{ include "miniapp.fullname" . }}-delivery

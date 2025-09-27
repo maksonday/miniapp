@@ -202,6 +202,23 @@ data:
     {{- $port := int .Values.kafka.service.ports.client -}}
     {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
+    [cour-reserve-consumer-config]
+    topic = "cour_reserve_status"
+    group-id = "cour_reserve_status"
+    version = "4.0.0"
+    brokers = [{{- $rn := .Release.Name -}}
+    {{- $ns := .Release.Namespace -}}
+    {{- $port := int .Values.kafka.service.ports.client -}}
+    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+
+    [cour-reserve-producer-config]
+    topic = "cour_reserve"
+    version = "4.0.0"
+    brokers = [{{- $rn := .Release.Name -}}
+    {{- $ns := .Release.Namespace -}}
+    {{- $port := int .Values.kafka.service.ports.client -}}
+    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+
 ---
 
 apiVersion: v1
@@ -231,6 +248,57 @@ data:
     [consumer-config]
     topic = "notifications"
     group-id = "notifications"
+    version = "4.0.0"
+    brokers = [{{- $rn := .Release.Name -}}
+    {{- $ns := .Release.Namespace -}}
+    {{- $port := int .Values.kafka.service.ports.client -}}
+    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "miniapp.fullname" . }}-cm-delivery
+  namespace: {{ .Release.Namespace }}
+data:
+  app-config: |
+    log-file = "/var/log/delivery.log"
+    log-level = "info"
+    listen-port = "8000"
+    auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
+    base-path = "{{ .Values.delivery.path }}"
+
+    [db-config]
+    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-config]
+    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+
+    [cour-reserve-consumer-config]
+    topic = "cour_reserve"
+    group-id = "cour_reserve"
+    version = "4.0.0"
+    brokers = [{{- $rn := .Release.Name -}}
+    {{- $ns := .Release.Namespace -}}
+    {{- $port := int .Values.kafka.service.ports.client -}}
+    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+
+    [cour-reserve-producer-config]
+    topic = "cour_reserve_status"
+    version = "4.0.0"
+    brokers = [{{- $rn := .Release.Name -}}
+    {{- $ns := .Release.Namespace -}}
+    {{- $port := int .Values.kafka.service.ports.client -}}
+    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+
+    [notifications-producer-config]
+    topic = "notifications"
     version = "4.0.0"
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
