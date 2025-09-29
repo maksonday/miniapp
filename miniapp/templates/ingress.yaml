@@ -57,3 +57,10 @@ spec:
               name: {{ include "miniapp.fullname" . }}-notifications
               port:
                 number: {{ .Values.service.port }}
+        - path: {{ .Values.delivery.path }}
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "miniapp.fullname" . }}-delivery
+              port:
+                number: {{ .Values.service.port }}

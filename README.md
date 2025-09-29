@@ -10,6 +10,7 @@
 4) Billing - сервис обработки платежей
 5) Order - сервис заказа
 6) Notifications - сервис уведомлений
+7) Delivery - сервис доставки.
 
 Спеки OpenAPI и AsyncAPI сервисов можно изучить в папке [spec](./spec).
 
@@ -54,6 +55,7 @@
 2) **POST** `/update_item` - обновление свойств товара на складе
 3) **POST** `/stock_change` - добавление или удаление товара на складе
 4) **GET** `/get_items` - получение списка товаров на складе. **TODO**: добавить пагинацию и фильтры.
+5) **POST** `/get_stock_changes`(админская ручка) - получение списка действий(резерв/отмена резерва) со складом для переданного номера заказа.
 
 ## Billing
 
@@ -62,6 +64,7 @@
 1) **POST** `/create_account` - создание аккаунта для пользователя, вызывается сервисом **Auth** при регистрации
 2) **GET** `/get_balance` - получить баланс текущего пользователя
 3) **POST** `/add_money` - пополнить баланс текущего пользователя
+4) **POST** `/get_payments`(админская ручка) - получение списка действий(списание, возврат средств) с балансом пользователя для переданного номера заказа.
 
 ## Order
 
@@ -76,6 +79,13 @@
 
 1) **GET** `/get_notifications` - получить список уведомлений пользователя. **TODO**: добавить пагинацию и фильтры.
 
+## Delivery
+
+Отвечает за подбор курьеров для доставки заказов. Курьер резервируется на час времени для доставки одного заказа. Расписание на завтрашний день вставляется в БД по крон-скрипту.
+
+1) **POST** `/add_courier`(админская ручка) - добавить нового курьера в систему, можно задать имя курьера.
+2) **POST** `/get_courier_reservations`(админская ручка) - получить список действий по бронированию курьеров для переданного номера заказа.
+3) **POST** `/confirm_delivered`(админская ручка) - подтвердить выполнение заказа, прожимается админом после физического отчета курьером о доставке.
 
 # Order Saga – Sequence Diagrams
 
@@ -96,6 +106,7 @@ sequenceDiagram
     participant S as Stock
     participant B as Billing
     participant N as Notification
+    participant D as Delivery
 
     C->>Auth: POST /register (регистрация)
     Auth->>Billing: POST /create_account (создание аккаунта)
@@ -108,8 +119,14 @@ sequenceDiagram
     O->>B: publish payments (списать деньги)
     B-->>O: publish payments_status (успех)
 
-    O->>N: publish notification (уведомление пользователю)
-    N-->>U: Отправка письма/сообщения
+    O->>N: publish notification (уведомление о статусе заказа 'approved')
+    N-->>C: уведомление: заказ подтвержден
+
+    O->>D: publish courier_reservation (бронируем слот доставки)
+    D-->>O: publish courier_reservation_status (успех)
+
+    O->>N: publish notification (уведомление о статусе заказа 'delivery')
+    N-->>C: уведомление: заказ в процессе доставки
 ```
 
 ```mermaid
@@ -123,6 +140,7 @@ sequenceDiagram
     participant S as Stock
     participant B as Billing
     participant N as Notification
+    participant D as Delivery
 
     C->>Auth: POST /register (регистрация)
     Auth->>Billing: POST /create_account (создание аккаунта)
@@ -132,8 +150,8 @@ sequenceDiagram
     O->>S: publish stock_changes (резервировать товары)
     S-->>O: publish stock_changes_status (ошибка)
 
-    O->>N: publish notification (сообщение о неуспехе)
-    N-->>U: уведомление: заказ не создан
+    O->>N: publish notification (сообщение об отмене заказа)
+    N-->>C: уведомление: заказ отменен
 ```
 
 ```mermaid
@@ -147,6 +165,7 @@ sequenceDiagram
     participant S as Stock
     participant B as Billing
     participant N as Notification
+    participant D as Delivery
 
     C->>Auth: POST /register (регистрация)
     Auth->>Billing: POST /create_account (создание аккаунта)
@@ -159,11 +178,51 @@ sequenceDiagram
     O->>B: publish payments (списать деньги)
     B-->>O: publish payments_status (ошибка)
 
-    O->>W: publish stock_changes (отмена резервации)
-    W-->>O: publish stock_changes_status (успех/отмена)
+    O->>S: publish stock_changes (отмена резервации)
+    S-->>O: publish stock_changes_status (успех)
 
-    O->>N: publish notification (сообщение о неуспехе)
-    N-->>U: уведомление: заказ не оплачен
+    O->>N: publish notification (сообщение об отмене заказа)
+    N-->>C: уведомление: заказ отменен
+```
+
+```mermaid
+sequenceDiagram
+    title Order Saga - Ошибка при бронировании слота доставки
+
+    participant C as Client
+    participant A as Auth
+    participant U as Users
+    participant O as Order
+    participant S as Stock
+    participant B as Billing
+    participant N as Notification
+    participant D as Delivery
+
+    C->>Auth: POST /register (регистрация)
+    Auth->>Billing: POST /create_account (создание аккаунта)
+
+    C->>O: POST /orders (создать заказ)
+    
+    O->>S: publish stock_changes (резервировать товары)
+    S-->>O: publish stock_changes_status (успех)
+
+    O->>B: publish payments (списать деньги)
+    B-->>O: publish payments_status (успех)
+
+    O->>N: publish notification (уведомление о статусе заказа 'approved')
+    N-->>U: Отправка письма/сообщения
+
+    O->>D: publish courier_reservation (бронируем слот доставки)
+    D->>O: publish courier_reservation_status (ошибка)
+
+    O->>B: publish payments (вернуть деньги)
+    B-->>O: publish payments_status (успех)
+
+    O->>S: publish stock_changes (отмена резервации)
+    S-->>O: publish stock_changes_status (успех)
+
+    O->>N: publish notification (уведомление об отмене заказа)
+    N-->>C: уведомление: заказ отменен
 ```
 
 ## Установка и запуск
@@ -228,6 +287,7 @@ helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSe
 ## Тестирование
 
 ```bash
+newman run miniapp/tests/pattern_Saga.postman_collection.json --delay-request 3000 # тестируем сценарии и откат при ошибках
 newman run miniapp/tests/services_rest.postman_collection.json --delay-request 5000 # тестируем заказ
 newman run miniapp/tests/auth_and_api.postman_collection.json # тестируем создание пользователя и аккаунта + авторизацию и аутентификацию
 ```
