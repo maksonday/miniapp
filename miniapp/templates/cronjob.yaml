@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "miniapp.fullname" . }}-create-courier-schedule-job
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "*/10 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: {{ include "miniapp.fullname" . }}-create-schedule
+              image: python:3.11-slim
+              command:
+                - /bin/bash
+                - -lc
+                - |
+                  set -euo pipefail
+                  python -V
+                  pip install --no-cache-dir psycopg2-binary
+                  python /app/create_schedule.py
+              env:
+                - name: DB_HOST
+                  value: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+                - name: DB_PORT
+                  value: "5432"
+                - name: DB_NAME
+                  value: "miniapp"
+                - name: DB_USER
+                  value: "postgres"
+                - name: SSL_MODE
+                  value: "disable"
+                - name: DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.postgresql.auth.existingSecret }}
+                      key: postgres-password
+                - name: DEFAULT_HOUR_MASK
+                  value: "000000000000000000000000"
+                - name: DB_RETRIES
+                  value: "5"
+                - name: DB_RETRY_DELAY_BASE
+                  value: "1.0"
+              volumeMounts:
+                - name: script
+                  mountPath: /app
+                  readOnly: true
+          volumes:
+            - name: script
+              configMap:
+                name: {{ include "miniapp.fullname" . }}-courier-schedule-scripts
+                defaultMode: 0o555

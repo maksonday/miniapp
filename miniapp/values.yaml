@@ -171,7 +171,7 @@ postgresql:
 
           CREATE TABLE IF NOT EXISTS couriers(
               id SERIAL PRIMARY KEY,
-              user_id INTEGER NOT NULL
+              name VARCHAR(256) NOT NULL DEFAULT ''
           );
 
           CREATE TABLE IF NOT EXISTS courier_schedule(
@@ -307,7 +307,7 @@ billing:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test16"
+    tag: "test18"
   path: /billing
 
 stock:
@@ -317,7 +317,7 @@ stock:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test20"
+    tag: "test23"
   path: /stock
 
 notifications:
@@ -337,7 +337,7 @@ order:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test14"
+    tag: "test20"
   path: /order
 
 
@@ -348,7 +348,7 @@ delivery:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test8"
+    tag: "test15"
   path: /delivery
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
