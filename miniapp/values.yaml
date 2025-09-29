@@ -327,7 +327,7 @@ notifications:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test4"
+    tag: "test5"
   path: /notifications
 
 order:
