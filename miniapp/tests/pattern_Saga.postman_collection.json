@@ -1626,7 +1626,7 @@
 							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(1);\r",
 							"    \r",
 							"    const firstElement = responseData[0];\r",
-							"    pm.expect(firstElement).to.have.property('id', 1);\r",
+							"    pm.expect(firstElement).to.have.property('id', 2);\r",
 							"    pm.expect(firstElement).to.have.property('amount', 1000);\r",
 							"    pm.expect(firstElement).to.have.property('status', 'failed');\r",
 							"    pm.expect(firstElement).to.have.property('action', 'pay');\r",
@@ -1734,6 +1734,70 @@
 					"path": [
 						"delivery",
 						"get_courier_reservations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check order status after order insufficient funds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is a list of 2 element\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(2);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Second order is 'canceled'\", function () {\r",
+							"    const responseData = pm.response.json()[1];\r",
+							"    pm.expect(responseData).to.have.property('id', 2);\r",
+							"    pm.expect(responseData).to.have.property('status', 'canceled');\r",
+							"    pm.expect(responseData).to.have.property('items').that.is.an('array').that.has.lengthOf(2);\r",
+							"    pm.expect(responseData.items[0]).to.have.property('id', 1);\r",
+							"    pm.expect(responseData.items[0]).to.have.property('quantity', 4);\r",
+							"    pm.expect(responseData.items[1]).to.have.property('id', 2);\r",
+							"    pm.expect(responseData.items[1]).to.have.property('quantity', 3);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/order/get_orders",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						"get_orders"
 					]
 				}
 			},
