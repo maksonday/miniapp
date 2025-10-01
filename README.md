@@ -288,7 +288,7 @@ kubectl apply -f manifests/ -n miniapp
 ```bash
 helm repo add miniapp https://maksonday.github.io/miniapp/
 helm repo update miniapp
-helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password --version 0.0.4
+helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password --version 0.0.5
 ```
 
 ## Тестирование
