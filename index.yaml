@@ -3,7 +3,7 @@ entries:
   miniapp:
   - apiVersion: v2
     appVersion: 0.0.4
-    created: "2025-10-02T00:45:00.058586507+05:00"
+    created: "2025-10-02T01:22:37.020687056+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -21,7 +21,7 @@ entries:
       repository: https://charts.bitnami.com/bitnami
       version: 32.4.3
     description: A Helm chart for Kubernetes
-    digest: e508e72451052963ae669b815de134ff366d2c31900efd4145ada684c7f51da4
+    digest: 4fd0f78b0e4554f70343ebb40e4986fbc5073cabe19e6426254dbd465d91a90f
     name: miniapp
     type: application
     urls:
@@ -29,7 +29,7 @@ entries:
     version: 0.0.4
   - apiVersion: v2
     appVersion: 0.0.3
-    created: "2025-10-02T00:45:00.000952762+05:00"
+    created: "2025-10-02T01:22:36.968640244+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -55,7 +55,7 @@ entries:
     version: 0.0.3
   - apiVersion: v2
     appVersion: 0.0.2
-    created: "2025-10-02T00:44:59.948274441+05:00"
+    created: "2025-10-02T01:22:36.910188554+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -81,7 +81,7 @@ entries:
     version: 0.0.2
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2025-10-02T00:44:59.896568441+05:00"
+    created: "2025-10-02T01:22:36.854935477+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -102,4 +102,4 @@ entries:
     urls:
     - https://maksonday.github.io/miniapp/miniapp-0.0.1.tgz
     version: 0.0.1
-generated: "2025-10-02T00:44:59.843705485+05:00"
+generated: "2025-10-02T01:22:36.803363928+05:00"
