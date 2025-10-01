@@ -63,7 +63,9 @@ postgresql:
           CREATE TABLE IF NOT EXISTS accounts (
               id SERIAL PRIMARY KEY,
               user_id INTEGER NOT NULL CONSTRAINT fk_user REFERENCES users(id) ON DELETE CASCADE,
-              balance NUMERIC(15, 2) DEFAULT 0.00
+              balance NUMERIC(15, 2) DEFAULT 0.00,
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
 
           DO $$
@@ -142,7 +144,9 @@ postgresql:
           CREATE TABLE IF NOT EXISTS stock (
               id SERIAL PRIMARY KEY,
               item_id INTEGER NOT NULL,
-              quantity INTEGER NOT NULL DEFAULT 0
+              quantity INTEGER NOT NULL DEFAULT 0,
+              ctime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              mtime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
 
           CREATE TYPE stock_action AS ENUM (
@@ -306,7 +310,7 @@ billing:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test18"
+    tag: "test23"
   path: /billing
 
 stock:
@@ -316,7 +320,7 @@ stock:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test23"
+    tag: "test27"
   path: /stock
 
 notifications:
@@ -336,7 +340,7 @@ order:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test22"
+    tag: "test23"
   path: /order
 
 
@@ -347,8 +351,9 @@ delivery:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test16"
+    tag: "test21"
   path: /delivery
+  courReserveMaxRetries: 5
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []

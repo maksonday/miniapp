@@ -69,6 +69,10 @@ data:
     database = "miniapp"
     sslmode = "disable"
     port = 5432
+    
+    [db-config.retry]
+    count = 5
+    delay = "3s"
 
     [redis-config]
     host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
@@ -113,6 +117,10 @@ data:
     sslmode = "disable"
     port = 5432
 
+    [db-config.retry]
+    count = 5
+    delay = "3s"
+
     [redis-config]
     host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
     port = 6379
@@ -148,6 +156,7 @@ data:
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
     base-path = "{{ .Values.order.path }}"
+    cour-reserve-retry-count = {{ .Values.delivery.courReserveMaxRetries }}
 
     [db-config]
     host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
@@ -155,6 +164,10 @@ data:
     database = "miniapp"
     sslmode = "disable"
     port = 5432
+
+    [db-config.retry]
+    count = 5
+    delay = "3s"
 
     [redis-config]
     host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
@@ -275,6 +288,10 @@ data:
     database = "miniapp"
     sslmode = "disable"
     port = 5432
+
+    [db-config.retry]
+    count = 5
+    delay = "3s"
 
     [redis-config]
     host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"

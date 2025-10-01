@@ -1,0 +1,602 @@
+{
+	"info": {
+		"_postman_id": "b65fdfb7-08cc-4ac1-adb8-538777772256",
+		"name": "idempotency_check",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25646654"
+	},
+	"item": [
+		{
+			"name": "check stock",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Stock changed after one successful order\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseBody).to.be.an(\"array\").with.lengthOf(3);\r",
+							"\r",
+							"    const expectedQuantities = {\r",
+							"        1: 8,\r",
+							"        2: 7,\r",
+							"        3: 10\r",
+							"    };\r",
+							"\r",
+							"    // Преобразуем массив ответа в объект по id\r",
+							"    const responseMap = responseBody.reduce((acc, item) => {\r",
+							"        acc[item.id] = item.quantity; // приводим id к строке\r",
+							"        return acc;\r",
+							"    }, {});\r",
+							"\r",
+							"    // Проверяем все ожидаемые значения\r",
+							"    Object.entries(expectedQuantities).forEach(([id, expected]) => {\r",
+							"        pm.test(`Item ID ${id} matches expected values`, function () {\r",
+							"            pm.expect(responseMap).to.have.property(id);\r",
+							"            const item = responseMap[id];\r",
+							"            pm.expect(item.name).to.equal(expected.name);\r",
+							"            pm.expect(item.price).to.equal(expected.price);\r",
+							"        });\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/stock/get_items",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"get_items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check balance",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Balance reduced only for 1 successful order\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseBody).to.have.property('balance');\r",
+							"    pm.expect(responseBody.balance).to.equal(10000 - (2 * 100 + 3 * 200)*1);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/billing/get_balance",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"billing",
+						"get_balance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check notifications",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Notifications contain messages 'approved', 'delivery' and 'canceled'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"\r",
+							"    pm.expect(Array.isArray(responseBody)).to.be.true; // Check if response is an array\r",
+							"\r",
+							"    const approvedMessages = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('message') && \r",
+							"        typeof item.message === 'string' && \r",
+							"        item.message.includes('approved')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(approvedMessages.length).to.equal(3); // Ensure there is 3 approved message per order\r",
+							"\r",
+							"    const deliveryMessages = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('message') && \r",
+							"        typeof item.message === 'string' && \r",
+							"        item.message.includes('delivery')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(deliveryMessages.length).to.equal(1); // only one courier is free\r",
+							"\r",
+							"    const canceledMessages = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('message') && \r",
+							"        typeof item.message === 'string' && \r",
+							"        item.message.includes('canceled')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(canceledMessages.length).to.equal(9); // 9 of 10 orders are canceled\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/notifications/get_notifications",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"notifications",
+						"get_notifications"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check stock changes",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\r",
+							"    \"Response contains 2 successful actions 'remove' with status 'ok' and not reverted, others are 'failed' or reverted\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody, \"Response contains 24 elements\").to.be.an('array').lengthOf(24);\r",
+							"\r",
+							"    const okStockReserve = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"remove\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') && item.hasOwnProperty('stock_id')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(okStockReserve, \"Response contains 6 successful 'remove' actions with status 'ok'\").to.have.lengthOf(6);\r",
+							"\r",
+							"    const okStockReverted = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"add\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') && item.hasOwnProperty('stock_id') &&\r",
+							"        item.hasOwnProperty('quantity')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(okStockReverted, \"Response contains 4 successful 'add' actions with status 'ok'\").to.have.lengthOf(4);\r",
+							"\r",
+							"    const failedStockReserve = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'failed' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"remove\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') && item.hasOwnProperty('stock_id')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(failedStockReserve, \"Response contains 14 failed 'remove' actions with status 'failed'\").to.have.lengthOf(14);\r",
+							"\r",
+							"    // New check to ensure all reverted reserves have a match in successful reserves\r",
+							"    okStockReverted.forEach(reverted => {\r",
+							"        const match = okStockReserve.find(successful => \r",
+							"            successful.order_id === reverted.order_id && \r",
+							"            successful.stock_id === reverted.stock_id && \r",
+							"            successful.quantity === reverted.quantity\r",
+							"        );\r",
+							"        pm.expect(match, `Reverted 'add' action with order_id ${reverted.order_id}, stock_id ${reverted.stock_id} and quantity ${reverted.quantity} has a corresponding 'remove' action`).to.exist;\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/stock/get_all_stock_changes",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"stock",
+						"get_all_stock_changes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check payments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains 5 successful actions, 3 of type 'pay' and 2 of type 'deposit', because only 1 order is successful at the end\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody, \"Response contains 5 elements\").to.be.an('array').that.has.lengthOf(5);\r",
+							"\r",
+							"    const canceledPayments = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"deposit\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') &&\r",
+							"        item.hasOwnProperty('amount') && item.amount === 800\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(canceledPayments, \"Response contains 2 canceled payments\").to.have.lengthOf(2);\r",
+							"\r",
+							"    const processedPayments = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"pay\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') &&\r",
+							"        item.hasOwnProperty('amount') && item.amount === 800\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(processedPayments, \"Response contains 3 processed payments\").to.have.lengthOf(3);\r",
+							"\r",
+							"    // Check that each canceled payment has a matching processed payment by order_id and amount\r",
+							"    canceledPayments.forEach(canceled => {\r",
+							"        const match = processedPayments.find(processed => \r",
+							"            processed.order_id === canceled.order_id && processed.amount === canceled.amount\r",
+							"        );\r",
+							"        pm.expect(match, `Canceled payment with order_id ${canceled.order_id} and amount ${canceled.amount} has no matching processed payment`).to.exist;\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"order_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/billing/get_all_payments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"billing",
+						"get_all_payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check cour reservation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Request body: \" + pm.request.body.toString());\r",
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is a list that contains only 1 successful reservation\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseBody).to.be.an('array');\r",
+							"    \r",
+							"    const successfulCourReservations = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('action') && item.action === 'reserve' &&\r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('id') &&  item.hasOwnProperty('order_id') &&\r",
+							"        item.hasOwnProperty('courier_id') && item.courier_id === 1\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(successfulCourReservations, \"Response contains only 1 successful courier reservation\").to.have.lengthOf(1);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"order_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/delivery/get_all_courier_reservations",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"delivery",
+						"get_all_courier_reservations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "check order status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
+							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
+							"\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"There are 10 orders, 1 has status 'delivery', others are 'canceled'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.be.an('array').that.has.lengthOf(10);\r",
+							"\r",
+							"    const canceledOrders = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('items') && Array.isArray(item.items) && item.items.length === 2 && \r",
+							"        item.items[0].hasOwnProperty('id') && item.items[0].id === 1 && item.items[0].hasOwnProperty('quantity') && item.items[0].quantity === 2 &&\r",
+							"        item.items[1].hasOwnProperty('id') && item.items[1].id === 2 && item.items[1].hasOwnProperty('quantity') && item.items[1].quantity === 3 && \r",
+							"        item.hasOwnProperty('status') && item.status === 'canceled' &&\r",
+							"        item.hasOwnProperty('id')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(canceledOrders).to.have.lengthOf(9);\r",
+							"\r",
+							"    const deliveryOrders = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('items') && Array.isArray(item.items) && item.items.length === 2 && \r",
+							"        item.items[0].hasOwnProperty('id') && item.items[0].id === 1 && item.items[0].hasOwnProperty('quantity') && item.items[0].quantity === 2 &&\r",
+							"        item.items[1].hasOwnProperty('id') && item.items[1].id === 2 && item.items[1].hasOwnProperty('quantity') && item.items[1].quantity === 3 && \r",
+							"        item.hasOwnProperty('status') && item.status === 'delivery' &&\r",
+							"        item.hasOwnProperty('id')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(deliveryOrders).to.have.lengthOf(1);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{authorization_admin}}",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "{{refresh_token_admin}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/order/get_orders",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						"get_orders"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "arch.homework",
+			"type": "string"
+		}
+	]
+}
