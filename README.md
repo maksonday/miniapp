@@ -87,7 +87,7 @@
 2) **POST** `/get_courier_reservations`(админская ручка) - получить список действий по бронированию курьеров для переданного номера заказа.
 3) **POST** `/confirm_delivered`(админская ручка) - подтвердить выполнение заказа, прожимается админом после физического отчета курьером о доставке.
 
-# Order Saga – Sequence Diagrams
+## Order Saga – Sequence Diagrams
 
 В данной секции описан механизм обработки заказа при помощи паттерна Saga.
 
@@ -225,6 +225,12 @@ sequenceDiagram
     N-->>C: уведомление: заказ отменен
 ```
 
+## Идемпотентность
+
+В сервисе заказа реализована идемпотентность методом оптимистичной блокировки: обновляемые таблицы содержат колонку mtime, по которой мы пытаемся отследить успешность применения изменений.
+Сначала читаем нужную строку и сохраняем ее mtime, затем пытаемся произвести update по условию mtime = selected mtime.
+Изменения пытаемся применить в транзакции Read Committed, если заафектилось 0 строк(по условию на mtime), то делаем роллбек изменений, иначе - коммит.
+
 ## Установка и запуск
 
 Перед запуском обязательно нужны:
@@ -282,12 +288,15 @@ kubectl apply -f manifests/ -n miniapp
 ```bash
 helm repo add miniapp https://maksonday.github.io/miniapp/
 helm repo update miniapp
-helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password --version 0.0.3
+helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password --version 0.0.4
 ```
 
 ## Тестирование
 
 ```bash
+# тестируем идемпотентность, делаем 10 заказов одновременно
+# денег хватает на все 10 заказов, на складе вещей хватает только на 3 заказа, а курьеров - только на 1 заказ
+./miniapp/tests/parallel_orders.sh
 newman run miniapp/tests/pattern_Saga.postman_collection.json --delay-request 3000 # тестируем сценарии и откат при ошибках
 newman run miniapp/tests/services_rest.postman_collection.json --delay-request 5000 # тестируем заказ
 newman run miniapp/tests/auth_and_api.postman_collection.json # тестируем создание пользователя и аккаунта + авторизацию и аутентификацию

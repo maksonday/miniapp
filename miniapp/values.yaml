@@ -310,7 +310,7 @@ billing:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test20"
+    tag: "test23"
   path: /billing
 
 stock:
@@ -320,7 +320,7 @@ stock:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test24"
+    tag: "test27"
   path: /stock
 
 notifications:
@@ -351,7 +351,7 @@ delivery:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test19"
+    tag: "test21"
   path: /delivery
   courReserveMaxRetries: 5
 

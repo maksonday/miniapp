@@ -110,7 +110,7 @@
 							"    const responseBody = pm.response.json();\r",
 							"\r",
 							"    pm.expect(responseBody).to.have.property('balance');\r",
-							"    pm.expect(responseBody.balance).to.equal(1000 - 2 * 100 - 3 * 200);\r",
+							"    pm.expect(responseBody.balance).to.equal(10000 - (2 * 100 + 3 * 200)*1);\r",
 							"});\r",
 							""
 						],
@@ -166,14 +166,13 @@
 							"\r",
 							"    pm.expect(Array.isArray(responseBody)).to.be.true; // Check if response is an array\r",
 							"\r",
-							"    // Check that only one message has status 'approved'\r",
 							"    const approvedMessages = responseBody.filter(item => \r",
 							"        item.hasOwnProperty('message') && \r",
 							"        typeof item.message === 'string' && \r",
 							"        item.message.includes('approved')\r",
 							"    );\r",
 							"\r",
-							"    pm.expect(approvedMessages.length).to.equal(1); // Ensure there is exactly one approved message\r",
+							"    pm.expect(approvedMessages.length).to.equal(3); // Ensure there is 3 approved message per order\r",
 							"\r",
 							"    const deliveryMessages = responseBody.filter(item => \r",
 							"        item.hasOwnProperty('message') && \r",
@@ -181,7 +180,7 @@
 							"        item.message.includes('delivery')\r",
 							"    );\r",
 							"\r",
-							"    pm.expect(deliveryMessages.length).to.equal(1);\r",
+							"    pm.expect(deliveryMessages.length).to.equal(1); // only one courier is free\r",
 							"\r",
 							"    const canceledMessages = responseBody.filter(item => \r",
 							"        item.hasOwnProperty('message') && \r",
@@ -189,7 +188,7 @@
 							"        item.message.includes('canceled')\r",
 							"    );\r",
 							"\r",
-							"    pm.expect(canceledMessages.length).to.equal(9);\r",
+							"    pm.expect(canceledMessages.length).to.equal(9); // 9 of 10 orders are canceled\r",
 							"});\r",
 							"\r",
 							""
@@ -228,7 +227,7 @@
 			"response": []
 		},
 		{
-			"name": "check stock changes after order ok",
+			"name": "check stock changes",
 			"event": [
 				{
 					"listen": "test",
@@ -242,26 +241,44 @@
 							"    pm.expect(pm.response.code).to.equal(200);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Response contains stock changes with 'remove' actions and status 'ok' for order_id = 1\", function () {\r",
-							"    const responseData = pm.response.json();\r",
+							"pm.test(\r",
+							"    \"Response contains 2 successful actions 'remove' with status 'ok' and not reverted, others are 'failed' or reverted\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody, \"Response contains 24 elements\").to.be.an('array').lengthOf(24);\r",
 							"\r",
-							"    // Check if response is an array\r",
-							"    pm.expect(responseData).to.be.an('array');\r",
+							"    const okStockReserve = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"remove\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') && item.hasOwnProperty('stock_id')\r",
+							"    );\r",
 							"\r",
-							"    // Create a map for stock_id to quantity\r",
-							"    const stockQuantityMap = {\r",
-							"        1: 2,\r",
-							"        2: 3\r",
-							"    };\r",
+							"    pm.expect(okStockReserve, \"Response contains 6 successful 'remove' actions with status 'ok'\").to.have.lengthOf(6);\r",
 							"\r",
-							"    // Validate each item in the response\r",
-							"    responseData.forEach(item => {\r",
-							"        pm.expect(item).to.have.all.keys('action', 'quantity', 'stock_id', 'id', 'ctime', 'mtime', 'status');\r",
-							"        pm.expect(item.action).to.equal('remove');\r",
-							"        pm.expect(item.status).to.equal('ok');\r",
+							"    const okStockReverted = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"add\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') && item.hasOwnProperty('stock_id') &&\r",
+							"        item.hasOwnProperty('quantity')\r",
+							"    );\r",
 							"\r",
-							"        // Validate stock_id and quantity against the map\r",
-							"        pm.expect(item.quantity).to.equal(stockQuantityMap[item.stock_id]);\r",
+							"    pm.expect(okStockReverted, \"Response contains 4 successful 'add' actions with status 'ok'\").to.have.lengthOf(4);\r",
+							"\r",
+							"    const failedStockReserve = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'failed' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"remove\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') && item.hasOwnProperty('stock_id')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(failedStockReserve, \"Response contains 14 failed 'remove' actions with status 'failed'\").to.have.lengthOf(14);\r",
+							"\r",
+							"    // New check to ensure all reverted reserves have a match in successful reserves\r",
+							"    okStockReverted.forEach(reverted => {\r",
+							"        const match = okStockReserve.find(successful => \r",
+							"            successful.order_id === reverted.order_id && \r",
+							"            successful.stock_id === reverted.stock_id && \r",
+							"            successful.quantity === reverted.quantity\r",
+							"        );\r",
+							"        pm.expect(match, `Reverted 'add' action with order_id ${reverted.order_id}, stock_id ${reverted.stock_id} and quantity ${reverted.quantity} has a corresponding 'remove' action`).to.exist;\r",
 							"    });\r",
 							"});\r",
 							""
@@ -272,8 +289,11 @@
 					}
 				}
 			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
-				"method": "POST",
+				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
@@ -288,7 +308,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 1\r\n}",
+					"raw": "",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -296,20 +316,20 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/stock/get_stock_changes",
+					"raw": "{{baseUrl}}/stock/get_all_stock_changes",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"stock",
-						"get_stock_changes"
+						"get_all_stock_changes"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "check payments after order ok",
+			"name": "check payments",
 			"event": [
 				{
 					"listen": "test",
@@ -323,16 +343,35 @@
 							"    pm.expect(pm.response.code).to.equal(200);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Response contains successful payment for order_id = 1\", function () {\r",
-							"    const responseData = pm.response.json();\r",
+							"pm.test(\"Response contains 5 successful actions, 3 of type 'pay' and 2 of type 'deposit', because only 1 order is successful at the end\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody, \"Response contains 5 elements\").to.be.an('array').that.has.lengthOf(5);\r",
 							"\r",
-							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(1);\r",
-							"    \r",
-							"    const firstElement = responseData[0];\r",
-							"    pm.expect(firstElement).to.have.property('id', 1);\r",
-							"    pm.expect(firstElement).to.have.property('amount', 800);\r",
-							"    pm.expect(firstElement).to.have.property('status', 'ok');\r",
-							"    pm.expect(firstElement).to.have.property('action', 'pay');\r",
+							"    const canceledPayments = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"deposit\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') &&\r",
+							"        item.hasOwnProperty('amount') && item.amount === 800\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(canceledPayments, \"Response contains 2 canceled payments\").to.have.lengthOf(2);\r",
+							"\r",
+							"    const processedPayments = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('action') && item.action === \"pay\" &&\r",
+							"        item.hasOwnProperty('order_id') && item.hasOwnProperty('id') &&\r",
+							"        item.hasOwnProperty('amount') && item.amount === 800\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(processedPayments, \"Response contains 3 processed payments\").to.have.lengthOf(3);\r",
+							"\r",
+							"    // Check that each canceled payment has a matching processed payment by order_id and amount\r",
+							"    canceledPayments.forEach(canceled => {\r",
+							"        const match = processedPayments.find(processed => \r",
+							"            processed.order_id === canceled.order_id && processed.amount === canceled.amount\r",
+							"        );\r",
+							"        pm.expect(match, `Canceled payment with order_id ${canceled.order_id} and amount ${canceled.amount} has no matching processed payment`).to.exist;\r",
+							"    });\r",
 							"});\r",
 							""
 						],
@@ -342,8 +381,11 @@
 					}
 				}
 			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
-				"method": "POST",
+				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
@@ -366,20 +408,20 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/billing/get_payments",
+					"raw": "{{baseUrl}}/billing/get_all_payments",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"billing",
-						"get_payments"
+						"get_all_payments"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "check cour reservation after order ok",
+			"name": "check cour reservation",
 			"event": [
 				{
 					"listen": "test",
@@ -393,16 +435,19 @@
 							"    pm.expect(pm.response.code).to.equal(200);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Response is a list of 1 element and contains data of courier successful reservation for order_id = 1\", function () {\r",
-							"    const responseData = pm.response.json();\r",
+							"pm.test(\"Response is a list that contains only 1 successful reservation\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
 							"    \r",
-							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(1);\r",
+							"    pm.expect(responseBody).to.be.an('array');\r",
 							"    \r",
-							"    const firstElement = responseData[0];\r",
-							"    pm.expect(firstElement).to.have.property('id', 1);\r",
-							"    pm.expect(firstElement).to.have.property('order_id', 1);\r",
-							"    pm.expect(firstElement).to.have.property('action', 'reserve');\r",
-							"    pm.expect(firstElement).to.have.property('status', 'ok');\r",
+							"    const successfulCourReservations = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('action') && item.action === 'reserve' &&\r",
+							"        item.hasOwnProperty('status') && item.status === 'ok' &&\r",
+							"        item.hasOwnProperty('id') &&  item.hasOwnProperty('order_id') &&\r",
+							"        item.hasOwnProperty('courier_id') && item.courier_id === 1\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(successfulCourReservations, \"Response contains only 1 successful courier reservation\").to.have.lengthOf(1);\r",
 							"});\r",
 							""
 						],
@@ -412,8 +457,11 @@
 					}
 				}
 			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
-				"method": "POST",
+				"method": "GET",
 				"header": [
 					{
 						"key": "Authorization",
@@ -436,20 +484,20 @@
 					}
 				},
 				"url": {
-					"raw": "{{baseUrl}}/delivery/get_courier_reservations",
+					"raw": "{{baseUrl}}/delivery/get_all_courier_reservations",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"delivery",
-						"get_courier_reservations"
+						"get_all_courier_reservations"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "check order status after order ok",
+			"name": "check order status",
 			"event": [
 				{
 					"listen": "test",
@@ -462,20 +510,29 @@
 							"    pm.expect(pm.response.code).to.equal(200);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Response is a list of 1 element\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(1);\r",
-							"});\r",
+							"pm.test(\"There are 10 orders, 1 has status 'delivery', others are 'canceled'\", function () {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody).to.be.an('array').that.has.lengthOf(10);\r",
 							"\r",
-							"pm.test(\"Order status is 'delivery'\", function () {\r",
-							"    const responseData = pm.response.json()[0];\r",
-							"    pm.expect(responseData).to.have.property('id', 1);\r",
-							"    pm.expect(responseData).to.have.property('status', 'delivery');\r",
-							"    pm.expect(responseData).to.have.property('items').that.is.an('array').that.has.lengthOf(2);\r",
-							"    pm.expect(responseData.items[0]).to.have.property('id', 1);\r",
-							"    pm.expect(responseData.items[0]).to.have.property('quantity', 2);\r",
-							"    pm.expect(responseData.items[1]).to.have.property('id', 2);\r",
-							"    pm.expect(responseData.items[1]).to.have.property('quantity', 3);\r",
+							"    const canceledOrders = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('items') && Array.isArray(item.items) && item.items.length === 2 && \r",
+							"        item.items[0].hasOwnProperty('id') && item.items[0].id === 1 && item.items[0].hasOwnProperty('quantity') && item.items[0].quantity === 2 &&\r",
+							"        item.items[1].hasOwnProperty('id') && item.items[1].id === 2 && item.items[1].hasOwnProperty('quantity') && item.items[1].quantity === 3 && \r",
+							"        item.hasOwnProperty('status') && item.status === 'canceled' &&\r",
+							"        item.hasOwnProperty('id')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(canceledOrders).to.have.lengthOf(9);\r",
+							"\r",
+							"    const deliveryOrders = responseBody.filter(item => \r",
+							"        item.hasOwnProperty('items') && Array.isArray(item.items) && item.items.length === 2 && \r",
+							"        item.items[0].hasOwnProperty('id') && item.items[0].id === 1 && item.items[0].hasOwnProperty('quantity') && item.items[0].quantity === 2 &&\r",
+							"        item.items[1].hasOwnProperty('id') && item.items[1].id === 2 && item.items[1].hasOwnProperty('quantity') && item.items[1].quantity === 3 && \r",
+							"        item.hasOwnProperty('status') && item.status === 'delivery' &&\r",
+							"        item.hasOwnProperty('id')\r",
+							"    );\r",
+							"\r",
+							"    pm.expect(deliveryOrders).to.have.lengthOf(1);\r",
 							"});\r",
 							""
 						],
@@ -507,671 +564,6 @@
 					"path": [
 						"order",
 						"get_orders"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check stock changes after order insufficient funds",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Stock changes contain 'remove' and 'add'(rollback) actions for each item with status 'ok' for order_id = 2\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"\r",
-							"    // Check if response is an array\r",
-							"    pm.expect(responseData).to.be.an('array');\r",
-							"\r",
-							"    // Define expected objects\r",
-							"    const expectedObjects = [\r",
-							"        { stock_id: 1, quantity: 4, action: 'remove', status: 'ok' },\r",
-							"        { stock_id: 2, quantity: 3, action: 'remove', status: 'ok' },\r",
-							"        { stock_id: 1, quantity: 4, action: 'add', status: 'ok' },\r",
-							"        { stock_id: 2, quantity: 3, action: 'add', status: 'ok' }\r",
-							"    ];\r",
-							"\r",
-							"    // Validate each expected object is present in the response\r",
-							"    expectedObjects.forEach(expected => {\r",
-							"        const found = responseData.find(item => \r",
-							"            item.stock_id === expected.stock_id &&\r",
-							"            item.quantity === expected.quantity &&\r",
-							"            item.action === expected.action &&\r",
-							"            item.status === expected.status\r",
-							"        );\r",
-							"        pm.expect(found).to.exist;\r",
-							"    });\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 2\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/stock/get_stock_changes",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"stock",
-						"get_stock_changes"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check payments after order insufficient funds",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response contains failed payment for order_id = 2\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"\r",
-							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(1);\r",
-							"    \r",
-							"    const firstElement = responseData[0];\r",
-							"    pm.expect(firstElement).to.have.property('id', 2);\r",
-							"    pm.expect(firstElement).to.have.property('amount', 1000);\r",
-							"    pm.expect(firstElement).to.have.property('status', 'failed');\r",
-							"    pm.expect(firstElement).to.have.property('action', 'pay');\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 2\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/billing/get_payments",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"billing",
-						"get_payments"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check cour reservation after order insufficient funds",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response is a list of courier reservation is empty for order_id = 2\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"    \r",
-							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(0);\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 2\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/delivery/get_courier_reservations",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"delivery",
-						"get_courier_reservations"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check stock changes after order not enough items in stock",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Stock changes contain 'remove' actions for each item with status 'failed' for order_id = 3\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"\r",
-							"    // Check if response is an array\r",
-							"    pm.expect(responseData).to.be.an('array');\r",
-							"\r",
-							"    // Define expected objects\r",
-							"    const expectedObjects = [\r",
-							"        { stock_id: 1, quantity: 10, action: 'remove', status: 'failed' },\r",
-							"        { stock_id: 2, quantity: 3, action: 'remove', status: 'failed' }\r",
-							"    ];\r",
-							"\r",
-							"    // Validate each expected object is present in the response\r",
-							"    expectedObjects.forEach(expected => {\r",
-							"        const found = responseData.find(item => \r",
-							"            item.stock_id === expected.stock_id &&\r",
-							"            item.quantity === expected.quantity &&\r",
-							"            item.action === expected.action &&\r",
-							"            item.status === expected.status\r",
-							"        );\r",
-							"        pm.expect(found).to.exist;\r",
-							"    });\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 3\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/stock/get_stock_changes",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"stock",
-						"get_stock_changes"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check payments after order not enough items in stock",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response contains empty list of payments for order_id = 3\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"\r",
-							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(0);\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 3\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/billing/get_payments",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"billing",
-						"get_payments"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check cour reservation after order not enough items in stock",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response is a list of courier reservation is empty for order_id = 3\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"    \r",
-							"    pm.expect(responseData).to.be.an('array').that.has.lengthOf(0);\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 3\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/delivery/get_courier_reservations",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"delivery",
-						"get_courier_reservations"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check stock changes after order no free couriers",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Stock changes contain 'remove' and 'add'(rollback) actions for each item with status 'ok' for order_id = 4\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"\r",
-							"    // Check if response is an array\r",
-							"    pm.expect(responseData).to.be.an('array');\r",
-							"\r",
-							"    // Define expected objects\r",
-							"    const expectedObjects = [\r",
-							"        { stock_id: 1, quantity: 1, action: 'remove', status: 'ok' },\r",
-							"        { stock_id: 1, quantity: 1, action: 'add', status: 'ok' }\r",
-							"    ];\r",
-							"\r",
-							"    // Validate each expected object is present in the response\r",
-							"    expectedObjects.forEach(expected => {\r",
-							"        const found = responseData.find(item => \r",
-							"            item.stock_id === expected.stock_id &&\r",
-							"            item.quantity === expected.quantity &&\r",
-							"            item.action === expected.action &&\r",
-							"            item.status === expected.status\r",
-							"        );\r",
-							"        pm.expect(found).to.exist;\r",
-							"    });\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 4\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/stock/get_stock_changes",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"stock",
-						"get_stock_changes"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check payments after order no free couriers",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response contains empty list of payments with actions 'pay' and 'deposit'(rollback) with status 'ok' for order_id = 4\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"\r",
-							"    const expectedObjects = [\r",
-							"        { id: 3, amount: 100, action: 'pay', status: 'ok' },\r",
-							"        { id: 4, amount: 100, action: 'deposit', status: 'ok' }\r",
-							"    ];\r",
-							"\r",
-							"    // Validate each expected object is present in the response\r",
-							"    expectedObjects.forEach(expected => {\r",
-							"        const found = responseData.find(item => \r",
-							"            item.id === expected.id &&\r",
-							"            item.amount === expected.amount &&\r",
-							"            item.action === expected.action &&\r",
-							"            item.status === expected.status\r",
-							"        );\r",
-							"        pm.expect(found).to.exist;\r",
-							"    });\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 4\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/billing/get_payments",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"billing",
-						"get_payments"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "check cour reservation after order no free couriers",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"console.log(\"Request body: \" + pm.request.body.toString());\r",
-							"console.log(\"Response headers: \" + pm.response.headers.toString());\r",
-							"console.log(\"Response body: \" + JSON.stringify(pm.response.json(), null, 2));\r",
-							"\r",
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"    pm.expect(pm.response.code).to.equal(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response contains courier reservation with status = 'failed' for order_id = 4\", function () {\r",
-							"    const responseData = pm.response.json();\r",
-							"\r",
-							"    const expectedObjects = [\r",
-							"        { id: 2, order_id: 4, action: 'reserve', status: 'failed' },\r",
-							"    ];\r",
-							"\r",
-							"    // Validate each expected object is present in the response\r",
-							"    expectedObjects.forEach(expected => {\r",
-							"        const found = responseData.find(item => \r",
-							"            item.id === expected.id &&\r",
-							"            item.order_id === expected.order_id &&\r",
-							"            item.action === expected.action &&\r",
-							"            item.status === expected.status\r",
-							"        );\r",
-							"        pm.expect(found).to.exist;\r",
-							"    });\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Authorization",
-						"value": "{{authorization_admin}}",
-						"type": "text"
-					},
-					{
-						"key": "Cookie",
-						"value": "{{refresh_token_admin}}",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"order_id\": 4\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{baseUrl}}/delivery/get_courier_reservations",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"delivery",
-						"get_courier_reservations"
 					]
 				}
 			},
