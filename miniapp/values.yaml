@@ -35,8 +35,9 @@ ingress-nginx:
           prometheus.io/port: "10254"
           prometheus.io/path: "/metrics"
 
-postgresql:
+postgresql:    
   image:
+    repository: bitnamilegacy/postgresql
     debug: true
 
   auth:
@@ -213,6 +214,8 @@ postgresql:
 
   metrics:
     enabled: true
+    image:
+      repository: bitnamilegacy/postgres-exporter
     service:
       annotations:
         prometheus.io/scrape: "true"
@@ -247,9 +250,13 @@ kube-prometheus-stack:
               replacement: $1:$2
 
 redis:
+  image:
+    repository: bitnamilegacy/redis
   architecture: standalone
 
 kafka:
+  image:
+    repository: bitnamilegacy/kafka
   listeners:
     client:
       protocol: PLAINTEXT
