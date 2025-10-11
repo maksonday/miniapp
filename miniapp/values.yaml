@@ -39,6 +39,14 @@ postgresql:
   image:
     repository: bitnamilegacy/postgresql
     debug: true
+  architecture: replication
+  primary:
+    persistence:
+      enabled: true
+  readReplicas:
+    replicaCount: 2
+    persistence:
+      enabled: true
 
   auth:
     existingSecret: ""
@@ -252,7 +260,16 @@ kube-prometheus-stack:
 redis:
   image:
     repository: bitnamilegacy/redis
-  architecture: standalone
+  architecture: replication
+  metrics:
+    enabled: true
+    image:
+      repository: bitnamilegacy/redis-exporter
+    service:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+        prometheus.io/path: "/metrics"
 
 kafka:
   image:
@@ -287,6 +304,17 @@ kafka:
       - name: cour_reserve_status
         partitions: 3
         replicas: 3
+  metrics:
+    # === JMX Exporter (JVM, broker internals) ===
+    jmx:
+      enabled: true
+      image:
+        repository: bitnamilegacy/jmx-exporter
+      service:
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "5556"
+          prometheus.io/path: "/metrics"
 
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
@@ -297,7 +325,7 @@ users:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test1"
+    tag: "test2"
   path: /api
 
 auth:
@@ -307,7 +335,7 @@ auth:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test2"
+    tag: "test3"
   path: /auth
 
 billing:
@@ -317,7 +345,7 @@ billing:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test23"
+    tag: "test25"
   path: /billing
 
 stock:
@@ -327,7 +355,7 @@ stock:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test27"
+    tag: "test29"
   path: /stock
 
 notifications:
@@ -337,7 +365,7 @@ notifications:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test6"
+    tag: "test7"
   path: /notifications
 
 order:
@@ -347,7 +375,7 @@ order:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test23"
+    tag: "test24"
   path: /order
 
 
@@ -358,7 +386,7 @@ delivery:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test21"
+    tag: "test23"
   path: /delivery
   courReserveMaxRetries: 5
 

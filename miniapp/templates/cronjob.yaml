@@ -26,7 +26,7 @@ spec:
                   python /app/create_schedule.py
               env:
                 - name: DB_HOST
-                  value: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+                  value: "{{ .Release.Name }}-postgresql-primary.{{ .Release.Namespace }}.svc.cluster.local"
                 - name: DB_PORT
                   value: "5432"
                 - name: DB_NAME
