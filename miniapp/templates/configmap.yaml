@@ -110,7 +110,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [producer-config]
     topic = "payments_status"
@@ -118,7 +118,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
@@ -164,7 +164,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [producer-config]
     topic = "stock_changes_status"
@@ -172,7 +172,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
@@ -219,7 +219,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [payments-producer-config]
     topic = "payments"
@@ -227,7 +227,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [stock-consumer-config]
     topic = "stock_changes_status"
@@ -236,7 +236,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [stock-producer-config]
     topic = "stock_changes"
@@ -244,7 +244,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [notifications-producer-config]
     topic = "notifications"
@@ -252,7 +252,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [cour-reserve-consumer-config]
     topic = "cour_reserve_status"
@@ -261,7 +261,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [cour-reserve-producer-config]
     topic = "cour_reserve"
@@ -269,7 +269,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
@@ -311,7 +311,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
@@ -357,7 +357,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [cour-reserve-producer-config]
     topic = "cour_reserve_status"
@@ -365,7 +365,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [notifications-producer-config]
     topic = "notifications"
@@ -373,7 +373,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
