@@ -301,3 +301,11 @@ newman run miniapp/tests/pattern_Saga.postman_collection.json --delay-request 30
 newman run miniapp/tests/services_rest.postman_collection.json --delay-request 5000 # тестируем заказ
 newman run miniapp/tests/auth_and_api.postman_collection.json # тестируем создание пользователя и аккаунта + авторизацию и аутентификацию
 ```
+
+# Дашборд
+
+```bash
+kubectl port-forward -n miniapp svc/miniapp-grafana 3000:80
+```
+
+Импортируем `Online-Shop-dashboard.json`

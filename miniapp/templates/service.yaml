@@ -5,12 +5,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "miniapp.labels" . | nindent 4 }}-users
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "{{ .Values.service.metrics.port }}"
 spec:
   type: ClusterIP
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.targetPort }}
+      name: http
+    - protocol: TCP
+      port: {{ .Values.service.metrics.port }}
+      targetPort: {{ .Values.service.metrics.port }}
+      name: metrics
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-users
@@ -24,12 +33,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "miniapp.labels" . | nindent 4 }}-auth
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "{{ .Values.service.metrics.port }}"
 spec:
   type: ClusterIP
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.targetPort }}
+      name: http
+    - protocol: TCP
+      port: {{ .Values.service.metrics.port }}
+      targetPort: {{ .Values.service.metrics.port }}
+      name: metrics
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-auth
@@ -43,12 +61,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "miniapp.labels" . | nindent 4 }}-billing
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "{{ .Values.service.metrics.port }}"
 spec:
   type: ClusterIP
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.targetPort }}
+      name: http
+    - protocol: TCP
+      port: {{ .Values.service.metrics.port }}
+      targetPort: {{ .Values.service.metrics.port }}
+      name: metrics
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-billing
@@ -62,12 +89,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "miniapp.labels" . | nindent 4 }}-stock
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "{{ .Values.service.metrics.port }}"
 spec:
   type: ClusterIP
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.targetPort }}
+      name: http
+    - protocol: TCP
+      port: {{ .Values.service.metrics.port }}
+      targetPort: {{ .Values.service.metrics.port }}
+      name: metrics
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-stock
@@ -81,12 +117,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "miniapp.labels" . | nindent 4 }}-order
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "{{ .Values.service.metrics.port }}"
 spec:
   type: ClusterIP
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.targetPort }}
+      name: http
+    - protocol: TCP
+      port: {{ .Values.service.metrics.port }}
+      targetPort: {{ .Values.service.metrics.port }}
+      name: metrics
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-order
@@ -100,12 +145,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "miniapp.labels" . | nindent 4 }}-notifications
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "{{ .Values.service.metrics.port }}"
 spec:
   type: ClusterIP
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.targetPort }}
+      name: http
+    - protocol: TCP
+      port: {{ .Values.service.metrics.port }}
+      targetPort: {{ .Values.service.metrics.port }}
+      name: metrics
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-notifications
@@ -119,12 +173,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "miniapp.labels" . | nindent 4 }}-delivery
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "{{ .Values.service.metrics.port }}"
 spec:
   type: ClusterIP
   ports:
     - protocol: TCP
       port: {{ .Values.service.port }}
-      targetPort: 8000
+      targetPort: {{ .Values.service.targetPort }}
+      name: http
+    - protocol: TCP
+      port: {{ .Values.service.metrics.port }}
+      targetPort: {{ .Values.service.metrics.port }}
+      name: metrics
   selector:
     {{- include "miniapp.selectorLabels" . | nindent 4 }}
     app: {{ include "miniapp.fullname" . }}-delivery

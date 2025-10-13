@@ -315,6 +315,10 @@ kafka:
           prometheus.io/scrape: "true"
           prometheus.io/port: "5556"
           prometheus.io/path: "/metrics"
+    prometheusRule:
+      enabled: true
+    serviceMonitor:
+      enabled: true
 
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
@@ -345,7 +349,7 @@ billing:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test25"
+    tag: "test26"
   path: /billing
 
 stock:
@@ -355,7 +359,7 @@ stock:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test29"
+    tag: "test30"
   path: /stock
 
 notifications:
@@ -365,7 +369,7 @@ notifications:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test7"
+    tag: "test8"
   path: /notifications
 
 order:
@@ -375,7 +379,7 @@ order:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test24"
+    tag: "test27"
   path: /order
 
 
@@ -386,7 +390,7 @@ delivery:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test24"
+    tag: "test25"
   path: /delivery
   courReserveMaxRetries: 5
 
@@ -430,6 +434,9 @@ securityContext: {}
 service:
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 80
+  targetPort: 8000
+  metrics:
+    port: 8542
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
