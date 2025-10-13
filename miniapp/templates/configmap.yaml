@@ -11,15 +11,22 @@ data:
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
     base-path = "{{ .Values.users.path }}"
 
-    [db-config]
-    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-master]
+    host = "{{ .Release.Name }}-postgresql-primary.{{ .Release.Namespace }}.svc.cluster.local"
     user = "postgres"
     database = "miniapp"
     sslmode = "disable"
     port = 5432
 
-    [redis-config]
-    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-replica]
+    host = "{{ .Release.Name }}-postgresql-read.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-replica]
+    host = "{{ .Release.Name }}-redis-replicas.{{ .Release.Namespace }}.svc.cluster.local"
     port = 6379
 
 ---
@@ -37,15 +44,26 @@ data:
     base-path = "{{ .Values.auth.path }}"
     billing-addr = "http://{{ include "miniapp.fullname" . }}-billing:{{ .Values.service.port }}{{ .Values.billing.path }}"
 
-    [db-config]
-    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-master]
+    host = "{{ .Release.Name }}-postgresql-primary.{{ .Release.Namespace }}.svc.cluster.local"
     user = "postgres"
     database = "miniapp"
     sslmode = "disable"
     port = 5432
 
-    [redis-config]
+    [db-replica]
+    host = "{{ .Release.Name }}-postgresql-read.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-master]
     host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+
+    [redis-replica]
+    host = "{{ .Release.Name }}-redis-replicas.{{ .Release.Namespace }}.svc.cluster.local"
     port = 6379
 
 ---
@@ -63,20 +81,27 @@ data:
     base-path = "{{ .Values.billing.path }}"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
 
-    [db-config]
-    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-master]
+    host = "{{ .Release.Name }}-postgresql-primary.{{ .Release.Namespace }}.svc.cluster.local"
     user = "postgres"
     database = "miniapp"
     sslmode = "disable"
     port = 5432
+
+    [db-replica]
+    host = "{{ .Release.Name }}-postgresql-read.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-replica]
+    host = "{{ .Release.Name }}-redis-replicas.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
     
-    [db-config.retry]
+    [db-retry]
     count = 5
     delay = "3s"
-
-    [redis-config]
-    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
-    port = 6379
 
     [consumer-config]
     topic = "payments"
@@ -110,20 +135,27 @@ data:
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
     base-path = "{{ .Values.stock.path }}"
 
-    [db-config]
-    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-master]
+    host = "{{ .Release.Name }}-postgresql-primary.{{ .Release.Namespace }}.svc.cluster.local"
     user = "postgres"
     database = "miniapp"
     sslmode = "disable"
     port = 5432
 
-    [db-config.retry]
+    [db-replica]
+    host = "{{ .Release.Name }}-postgresql-read.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-replica]
+    host = "{{ .Release.Name }}-redis-replicas.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+
+    [db-retry]
     count = 5
     delay = "3s"
-
-    [redis-config]
-    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
-    port = 6379
 
     [consumer-config]
     topic = "stock_changes"
@@ -158,20 +190,27 @@ data:
     base-path = "{{ .Values.order.path }}"
     cour-reserve-retry-count = {{ .Values.delivery.courReserveMaxRetries }}
 
-    [db-config]
-    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-master]
+    host = "{{ .Release.Name }}-postgresql-primary.{{ .Release.Namespace }}.svc.cluster.local"
     user = "postgres"
     database = "miniapp"
     sslmode = "disable"
     port = 5432
 
-    [db-config.retry]
+    [db-replica]
+    host = "{{ .Release.Name }}-postgresql-read.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-replica]
+    host = "{{ .Release.Name }}-redis-replicas.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+
+    [db-retry]
     count = 5
     delay = "3s"
-
-    [redis-config]
-    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
-    port = 6379
 
     [payments-consumer-config]
     topic = "payments_status"
@@ -247,15 +286,22 @@ data:
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
     base-path = "{{ .Values.notifications.path }}"
 
-    [db-config]
-    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-master]
+    host = "{{ .Release.Name }}-postgresql-primary.{{ .Release.Namespace }}.svc.cluster.local"
     user = "postgres"
     database = "miniapp"
     sslmode = "disable"
     port = 5432
 
-    [redis-config]
-    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-replica]
+    host = "{{ .Release.Name }}-postgresql-read.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-replica]
+    host = "{{ .Release.Name }}-redis-replicas.{{ .Release.Namespace }}.svc.cluster.local"
     port = 6379
 
     [consumer-config]
@@ -282,20 +328,27 @@ data:
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
     base-path = "{{ .Values.delivery.path }}"
 
-    [db-config]
-    host = "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+    [db-master]
+    host = "{{ .Release.Name }}-postgresql-primary.{{ .Release.Namespace }}.svc.cluster.local"
     user = "postgres"
     database = "miniapp"
     sslmode = "disable"
     port = 5432
 
-    [db-config.retry]
+    [db-replica]
+    host = "{{ .Release.Name }}-postgresql-read.{{ .Release.Namespace }}.svc.cluster.local"
+    user = "postgres"
+    database = "miniapp"
+    sslmode = "disable"
+    port = 5432
+
+    [redis-replica]
+    host = "{{ .Release.Name }}-redis-replicas.{{ .Release.Namespace }}.svc.cluster.local"
+    port = 6379
+
+    [db-retry]
     count = 5
     delay = "3s"
-
-    [redis-config]
-    host = "{{ .Release.Name }}-redis-master.{{ .Release.Namespace }}.svc.cluster.local"
-    port = 6379
 
     [cour-reserve-consumer-config]
     topic = "cour_reserve"

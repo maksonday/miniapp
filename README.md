@@ -1,8 +1,8 @@
-# miniapp
+# Online Shop
 
 ## Описание сервисов
 
-На данный момент miniapp включает в себя следующие сервисы:
+На данный момент Online Shop включает в себя следующие сервисы:
 
 1) Auth - сервис для авторизации и аутентификации
 2) Users - сервис для управления данными пользователя
@@ -288,7 +288,7 @@ kubectl apply -f manifests/ -n miniapp
 ```bash
 helm repo add miniapp https://maksonday.github.io/miniapp/
 helm repo update miniapp
-helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password --version 0.0.5
+helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password --version 0.0.6
 ```
 
 ## Тестирование
