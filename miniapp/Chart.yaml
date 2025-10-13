@@ -43,3 +43,7 @@ dependencies:
   - name: "kafka"
     version: "32.4.3"
     repository: "https://charts.bitnami.com/bitnami"
+  
+  - name: elasticsearch
+    version: 8.5.1
+    repository: https://helm.elastic.co
