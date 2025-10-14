@@ -324,3 +324,5 @@ kubectl port-forward -n miniapp svc/miniapp-kube-prometheus-st-prometheus 9090:9
 ```bash
 kubectl port-forward svc/miniapp-kibana-kibana 5601:5601 -n miniapp
 ```
+
+Выбираем DataView с паттерном `filebeat-*`
