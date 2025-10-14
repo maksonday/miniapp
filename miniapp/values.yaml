@@ -395,16 +395,51 @@ delivery:
   courReserveMaxRetries: 5
 
 elasticsearch:
-  esJavaOpts: "-Xmx512m -Xms512m"
   secret:
     password: "test"
+  antiAffinity: "soft"
 
+  # Shrink default JVM heap.
+  esJavaOpts: "-Xms1g -Xmx1g"
 
-kibana:
-  replicas: 1
-  #elasticsearchHosts: [ http://elasticsearch-master:9200 ]
-  service:
-    type: ClusterIP
+  # Allocate smaller chunks of memory per pod.
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 1
+    limits:
+      memory: 4Gi
+      cpu: 2
+
+  # Request smaller persistent volumes.
+  volumeClaimTemplate:
+    accessModes: [ "ReadWriteOnce" ]
+    storageClassName: "standard"
+    resources:
+      requests:
+        storage: 100M
+
+filebeat:
+  daemonset:
+    enabled: true
+    config:
+      filebeat.yml: |
+        filebeat.inputs:
+        - type: log
+          enabled: true
+          paths:
+            - /var/log/*.log
+          json.keys_under_root: true
+          json.add_error_key: true
+
+        output.elasticsearch:
+          hosts: ['elasticsearch-master:9200']
+          username: elastic
+          password: test
+
+        setup.kibana:
+          host: "miniapp-kibana:5601"
+
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
