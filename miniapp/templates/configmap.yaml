@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/users.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -38,7 +38,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/auth-service.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     base-path = "{{ .Values.auth.path }}"
@@ -75,7 +75,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/billing.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     base-path = "{{ .Values.billing.path }}"
@@ -129,7 +129,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/stock.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -183,7 +183,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/order.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -280,7 +280,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/notifications.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -322,7 +322,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/delivery.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"

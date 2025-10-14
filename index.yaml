@@ -2,8 +2,8 @@ apiVersion: v1
 entries:
   miniapp:
   - apiVersion: v2
-    appVersion: 0.0.6
-    created: "2025-10-13T05:16:11.237979442+05:00"
+    appVersion: 0.0.7
+    created: "2025-10-14T17:15:27.449900706+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -20,16 +20,54 @@ entries:
     - name: kafka
       repository: https://charts.bitnami.com/bitnami
       version: 32.4.3
+    - name: elasticsearch
+      repository: https://helm.elastic.co
+      version: 8.5.1
+    - name: filebeat
+      repository: https://helm.elastic.co
+      version: 8.5.1
     description: A Helm chart for Kubernetes
-    digest: ec00c17dca372750ef0b378fee4bc35b863375d1922c76a2ff69725c2777603e
+    digest: 38b5ba07d3bf465d1d9e9311e487d22a5268a0770977d717b45514bdeb3c7f3d
     name: miniapp
     type: application
     urls:
-    - https://maksonday.github.io/miniapp/miniapp-0.0.6.tgz
+    - ttps://maksonday.github.io/miniapp/miniapp-0.0.7.tgz
+    version: 0.0.7
+  - apiVersion: v2
+    appVersion: 0.0.6
+    created: "2025-10-14T17:15:27.383969721+05:00"
+    dependencies:
+    - name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 16.7.19
+    - name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx/
+      version: 4.13.0
+    - name: kube-prometheus-stack
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 75.15.0
+    - name: redis
+      repository: https://charts.bitnami.com/bitnami
+      version: 22.0.0
+    - name: kafka
+      repository: https://charts.bitnami.com/bitnami
+      version: 32.4.3
+    - name: elasticsearch
+      repository: https://helm.elastic.co
+      version: 8.5.1
+    - name: filebeat
+      repository: https://helm.elastic.co
+      version: 8.5.1
+    description: A Helm chart for Kubernetes
+    digest: fdb8efe4afaf19d65bf1aef007c67fbb441010f430fea71144c6c170c75ac941
+    name: miniapp
+    type: application
+    urls:
+    - ttps://maksonday.github.io/miniapp/miniapp-0.0.6.tgz
     version: 0.0.6
   - apiVersion: v2
     appVersion: 0.0.5
-    created: "2025-10-13T05:16:11.188718834+05:00"
+    created: "2025-10-14T17:15:27.321504255+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -51,11 +89,11 @@ entries:
     name: miniapp
     type: application
     urls:
-    - https://maksonday.github.io/miniapp/miniapp-0.0.5.tgz
+    - ttps://maksonday.github.io/miniapp/miniapp-0.0.5.tgz
     version: 0.0.5
   - apiVersion: v2
     appVersion: 0.0.4
-    created: "2025-10-13T05:16:11.134565609+05:00"
+    created: "2025-10-14T17:15:27.267711469+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -77,11 +115,11 @@ entries:
     name: miniapp
     type: application
     urls:
-    - https://maksonday.github.io/miniapp/miniapp-0.0.4.tgz
+    - ttps://maksonday.github.io/miniapp/miniapp-0.0.4.tgz
     version: 0.0.4
   - apiVersion: v2
     appVersion: 0.0.3
-    created: "2025-10-13T05:16:11.079449848+05:00"
+    created: "2025-10-14T17:15:27.215796452+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -103,11 +141,11 @@ entries:
     name: miniapp
     type: application
     urls:
-    - https://maksonday.github.io/miniapp/miniapp-0.0.3.tgz
+    - ttps://maksonday.github.io/miniapp/miniapp-0.0.3.tgz
     version: 0.0.3
   - apiVersion: v2
     appVersion: 0.0.2
-    created: "2025-10-13T05:16:11.015915601+05:00"
+    created: "2025-10-14T17:15:27.152302279+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -129,11 +167,11 @@ entries:
     name: miniapp
     type: application
     urls:
-    - https://maksonday.github.io/miniapp/miniapp-0.0.2.tgz
+    - ttps://maksonday.github.io/miniapp/miniapp-0.0.2.tgz
     version: 0.0.2
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2025-10-13T05:16:10.953140621+05:00"
+    created: "2025-10-14T17:15:27.094991904+05:00"
     dependencies:
     - name: postgresql
       repository: https://charts.bitnami.com/bitnami
@@ -152,6 +190,6 @@ entries:
     name: miniapp
     type: application
     urls:
-    - https://maksonday.github.io/miniapp/miniapp-0.0.1.tgz
+    - ttps://maksonday.github.io/miniapp/miniapp-0.0.1.tgz
     version: 0.0.1
-generated: "2025-10-13T05:16:10.903580518+05:00"
+generated: "2025-10-14T17:15:27.046277405+05:00"

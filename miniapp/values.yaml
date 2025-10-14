@@ -417,28 +417,46 @@ elasticsearch:
     storageClassName: "standard"
     resources:
       requests:
-        storage: 100M
+        storage: 1Gi
 
 filebeat:
   daemonset:
     enabled: true
-    config:
+    filebeatConfig:
       filebeat.yml: |
         filebeat.inputs:
-        - type: log
-          enabled: true
+        - type: filestream
+          id: miniapp-logs
+          prospector.scanner.symlinks: true
+          parsers:
+            - container: ~
           paths:
-            - /var/log/*.log
-          json.keys_under_root: true
-          json.add_error_key: true
+            - /var/log/containers/*.log
+        
+        filebeat.autodiscover:
+          providers:
+            - type: kubernetes
+              node: ${NODE_NAME}
+              hints.enabled: true
+              hints.default_config:
+                type: filestream
+                id: container-miniapp-logs
+                prospector.scanner.symlinks: true
+                parsers:
+                  - container: ~
+                paths:
+                  - /var/log/containers/*.log
 
         output.elasticsearch:
-          hosts: ['elasticsearch-master:9200']
-          username: elastic
-          password: test
+          host: '${NODE_NAME}'
+          hosts: '["https://${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}"]'
+          username: '${ELASTICSEARCH_USERNAME}'
+          password: '${ELASTICSEARCH_PASSWORD}'
+          protocol: https
+          ssl.certificate_authorities: ["/usr/share/filebeat/certs/ca.crt"]
 
         setup.kibana:
-          host: "miniapp-kibana:5601"
+          host: "miniapp-kibana-kibana:5601"
 
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/

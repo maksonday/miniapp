@@ -6,6 +6,6 @@ for i in {1..10}; do
 done
 wait
 
-sleep 10
+sleep 60
 
 newman run miniapp/tests/idempotency_check.postman_collection.json -e new_env.json
