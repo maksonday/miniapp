@@ -315,6 +315,10 @@ kafka:
           prometheus.io/scrape: "true"
           prometheus.io/port: "5556"
           prometheus.io/path: "/metrics"
+    prometheusRule:
+      enabled: true
+    serviceMonitor:
+      enabled: true
 
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
@@ -325,7 +329,7 @@ users:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test2"
+    tag: "test5"
   path: /api
 
 auth:
@@ -335,7 +339,7 @@ auth:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test3"
+    tag: "test5"
   path: /auth
 
 billing:
@@ -345,7 +349,7 @@ billing:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test25"
+    tag: "test29"
   path: /billing
 
 stock:
@@ -355,7 +359,7 @@ stock:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test29"
+    tag: "test33"
   path: /stock
 
 notifications:
@@ -365,7 +369,7 @@ notifications:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test7"
+    tag: "test10"
   path: /notifications
 
 order:
@@ -375,7 +379,7 @@ order:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test24"
+    tag: "test29"
   path: /order
 
 
@@ -386,9 +390,74 @@ delivery:
     # This sets the pull policy for images.
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "test24"
+    tag: "test28"
   path: /delivery
   courReserveMaxRetries: 5
+
+elasticsearch:
+  secret:
+    password: "test"
+  antiAffinity: "soft"
+
+  # Shrink default JVM heap.
+  esJavaOpts: "-Xms1g -Xmx1g"
+
+  # Allocate smaller chunks of memory per pod.
+  resources:
+    requests:
+      memory: 2Gi
+      cpu: 1
+    limits:
+      memory: 4Gi
+      cpu: 2
+
+  # Request smaller persistent volumes.
+  volumeClaimTemplate:
+    accessModes: [ "ReadWriteOnce" ]
+    storageClassName: "standard"
+    resources:
+      requests:
+        storage: 1Gi
+
+filebeat:
+  daemonset:
+    enabled: true
+    filebeatConfig:
+      filebeat.yml: |
+        filebeat.inputs:
+        - type: filestream
+          id: miniapp-logs
+          prospector.scanner.symlinks: true
+          parsers:
+            - container: ~
+          paths:
+            - /var/log/containers/*.log
+        
+        filebeat.autodiscover:
+          providers:
+            - type: kubernetes
+              node: ${NODE_NAME}
+              hints.enabled: true
+              hints.default_config:
+                type: filestream
+                id: container-miniapp-logs
+                prospector.scanner.symlinks: true
+                parsers:
+                  - container: ~
+                paths:
+                  - /var/log/containers/*.log
+
+        output.elasticsearch:
+          host: '${NODE_NAME}'
+          hosts: '["https://${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}"]'
+          username: '${ELASTICSEARCH_USERNAME}'
+          password: '${ELASTICSEARCH_PASSWORD}'
+          protocol: https
+          ssl.certificate_authorities: ["/usr/share/filebeat/certs/ca.crt"]
+
+        setup.kibana:
+          host: "miniapp-kibana-kibana:5601"
+
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -430,6 +499,9 @@ securityContext: {}
 service:
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
   port: 80
+  targetPort: 8000
+  metrics:
+    port: 8542
 
 # This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:

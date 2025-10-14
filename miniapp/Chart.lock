@@ -14,5 +14,11 @@ dependencies:
 - name: kafka
   repository: https://charts.bitnami.com/bitnami
   version: 32.4.3
-digest: sha256:3294661e468b668befcb2de5e5f8758e2cb9a6dbb94dd9fcbb9a572dbf541a61
-generated: "2025-10-11T22:28:02.764816778+05:00"
+- name: elasticsearch
+  repository: https://helm.elastic.co
+  version: 8.5.1
+- name: filebeat
+  repository: https://helm.elastic.co
+  version: 8.5.1
+digest: sha256:3459089fb7944faca72032e8ca56dede8b1ec179dea2a3f4133c2f9272c25bba
+generated: "2025-10-14T14:27:38.353819897+05:00"

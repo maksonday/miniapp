@@ -288,7 +288,10 @@ kubectl apply -f manifests/ -n miniapp
 ```bash
 helm repo add miniapp https://maksonday.github.io/miniapp/
 helm repo update miniapp
-helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password --version 0.0.6
+helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSecret=postgres-secret --set redis.auth.existingSecret=redis-secret --set auth.existingSecret=rsa-cert --set redis.auth.existingSecretPasswordKey=redis-password --version 0.0.7
+# Ждем установки нашего чарта, в частности нужно, чтобы установился elasticsearch, иначе kibana не заработает
+helm repo add elastic https://helm.elastic.co
+helm install miniapp-kibana elastic/kibana --version 8.5.1 -n miniapp
 ```
 
 ## Тестирование
@@ -300,4 +303,24 @@ helm install miniapp -n miniapp miniapp/miniapp --set postgresql.auth.existingSe
 newman run miniapp/tests/pattern_Saga.postman_collection.json --delay-request 3000 # тестируем сценарии и откат при ошибках
 newman run miniapp/tests/services_rest.postman_collection.json --delay-request 5000 # тестируем заказ
 newman run miniapp/tests/auth_and_api.postman_collection.json # тестируем создание пользователя и аккаунта + авторизацию и аутентификацию
+```
+
+# Дашборд
+
+```bash
+kubectl port-forward -n miniapp svc/miniapp-grafana 3000:80
+```
+
+Импортируем `dashboard.json`, `alert-rules.json`
+
+# Prometheus 
+
+```bash
+kubectl port-forward -n miniapp svc/miniapp-kube-prometheus-st-prometheus 9090:9090
+```
+
+# Kibana
+
+```bash
+kubectl port-forward svc/miniapp-kibana-kibana 5601:5601 -n miniapp
 ```

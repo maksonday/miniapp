@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/users.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -38,7 +38,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/auth-service.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     base-path = "{{ .Values.auth.path }}"
@@ -75,7 +75,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/billing.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     base-path = "{{ .Values.billing.path }}"
@@ -110,7 +110,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [producer-config]
     topic = "payments_status"
@@ -118,7 +118,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
@@ -129,7 +129,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/stock.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -164,7 +164,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [producer-config]
     topic = "stock_changes_status"
@@ -172,7 +172,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
@@ -183,7 +183,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/order.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -219,7 +219,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [payments-producer-config]
     topic = "payments"
@@ -227,7 +227,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [stock-consumer-config]
     topic = "stock_changes_status"
@@ -236,7 +236,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [stock-producer-config]
     topic = "stock_changes"
@@ -244,7 +244,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [notifications-producer-config]
     topic = "notifications"
@@ -252,7 +252,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [cour-reserve-consumer-config]
     topic = "cour_reserve_status"
@@ -261,7 +261,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [cour-reserve-producer-config]
     topic = "cour_reserve"
@@ -269,7 +269,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
@@ -280,7 +280,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/notifications.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -311,7 +311,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
@@ -322,7 +322,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   app-config: |
-    log-file = "/var/log/delivery.log"
+    log-file = "stdout"
     log-level = "info"
     listen-port = "8000"
     auth-addr = "http://{{ include "miniapp.fullname" . }}-auth:{{ .Values.service.port }}{{ .Values.auth.path }}"
@@ -357,7 +357,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [cour-reserve-producer-config]
     topic = "cour_reserve_status"
@@ -365,7 +365,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
     [notifications-producer-config]
     topic = "notifications"
@@ -373,7 +373,7 @@ data:
     brokers = [{{- $rn := .Release.Name -}}
     {{- $ns := .Release.Namespace -}}
     {{- $port := int .Values.kafka.service.ports.client -}}
-    {{- printf "\"%s-kafka-controller-headless.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
+    {{- printf "\"%s-kafka.%s.svc.cluster.local:%d\"" $rn $ns $port -}}]
 
 ---
 
